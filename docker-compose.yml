@@ -1,0 +1,104 @@
+services:
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: digital-twin-mosquitto
+    restart: unless-stopped
+
+    ports:
+      - "1883:1883"
+
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "mosquitto_sub -h localhost -p 1883 -t '$$SYS/broker/version' -C 1 -W 3 >/dev/null 2>&1 || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+
+  backend:
+    build: .
+    container_name: digital-twin-backend
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    environment:
+      MQTT_BROKER: mosquitto
+      MQTT_PORT: 1883
+      MQTT_TOPIC: uday/digital-twin/DT-DEVICE-001/telemetry
+
+    volumes:
+      - ./data:/app/data
+
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+
+  mqtt-subscriber:
+    build: .
+    container_name: digital-twin-mqtt-subscriber
+    command: python -u backend/mqtt_subscriber.py
+    restart: unless-stopped
+
+    environment:
+      MQTT_BROKER: mosquitto
+      MQTT_PORT: 1883
+      MQTT_TOPIC: uday/digital-twin/DT-DEVICE-001/telemetry
+      FASTAPI_URL: http://backend:8000
+
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+
+
+  dashboard:
+    build: .
+    container_name: digital-twin-dashboard
+    restart: unless-stopped
+
+    command: >
+      python -m streamlit run dashboard/app.py
+      --server.address=0.0.0.0
+      --server.port=8501
+
+    ports:
+      - "8501:8501"
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    environment:
+      FASTAPI_URL: http://backend:8000
+
+    depends_on:
+      backend:
+        condition: service_healthy
