@@ -1,7 +1,7 @@
 import random
 import time
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 from dataclasses import dataclass, asdict
 
 
@@ -33,20 +33,18 @@ class EmbeddedDeviceSimulator:
         self.rpm = 1500
 
     def _update_normal_values(self):
-        """Simulate normal operating changes."""
+        """Simulate realistic normal operating fluctuations with mean-reversion."""
+        self.temperature += 0.05 * (32.0 - self.temperature) + random.uniform(-0.25, 0.25)
+        self.voltage += 0.05 * (12.0 - self.voltage) + random.uniform(-0.05, 0.05)
+        self.current += 0.05 * (1.5 - self.current) + random.uniform(-0.05, 0.05)
+        self.vibration += 0.05 * (0.22 - self.vibration) + random.uniform(-0.015, 0.015)
+        self.rpm += int(0.05 * (1500 - self.rpm)) + random.randint(-15, 15)
 
-        self.temperature += random.uniform(-0.4, 0.6)
-        self.voltage += random.uniform(-0.08, 0.08)
-        self.current += random.uniform(-0.08, 0.08)
-        self.vibration += random.uniform(-0.02, 0.02)
-        self.rpm += random.randint(-25, 25)
-
-        self.temperature = max(20.0, min(self.temperature, 45.0))
-        self.voltage = max(10.5, min(self.voltage, 13.0))
-        self.current = max(0.5, min(self.current, 3.0))
-        self.vibration = max(0.05, min(self.vibration, 1.0))
-        self.rpm = max(1000, min(self.rpm, 2000))
-
+        self.temperature = max(25.0, min(self.temperature, 40.0))
+        self.voltage = max(11.2, min(self.voltage, 12.8))
+        self.current = max(1.0, min(self.current, 2.2))
+        self.vibration = max(0.10, min(self.vibration, 0.50))
+        self.rpm = max(1400, min(self.rpm, 1600))
     def _inject_fault(self):
         """Generate a simulated device fault."""
 
@@ -83,7 +81,7 @@ class EmbeddedDeviceSimulator:
 
         reading = SensorReading(
             device_id=self.device_id,
-            timestamp=datetime.now().isoformat(timespec="seconds"),
+            timestamp=datetime.now(timezone.utc).isoformat(timespec="seconds"),
             temperature=round(self.temperature, 2),
             voltage=round(self.voltage, 2),
             current=round(self.current, 2),
@@ -107,8 +105,8 @@ def send_to_backend(reading):
 
         if response.status_code == 200:
             print(
-                f"✓ Sent | "
-                f"Temp: {reading['temperature']}°C | "
+                f"[OK] Sent | "
+                f"Temp: {reading['temperature']}C | "
                 f"Voltage: {reading['voltage']}V | "
                 f"Current: {reading['current']}A | "
                 f"Vibration: {reading['vibration']} | "
@@ -116,10 +114,10 @@ def send_to_backend(reading):
                 f"Status: {reading['status']}"
             )
         else:
-            print(f"✗ API error: {response.status_code}")
+            print(f"[ERROR] API error: {response.status_code}")
 
     except requests.exceptions.RequestException as error:
-        print(f"✗ Backend connection failed: {error}")
+        print(f"[ERROR] Backend connection failed: {error}")
 
 
 if __name__ == "__main__":
