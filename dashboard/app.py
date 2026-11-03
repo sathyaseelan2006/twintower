@@ -24,6 +24,7 @@ load_dotenv(BASE_DIR / ".env")
 API_BASE_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000")
 
 # Import Testing Engine & Models
+from tests.academic_test_suite import ACADEMIC_TEST_CASES, execute_test, execute_all_tests
 from tests.test_microgrid_scenarios import BENCHMARK_CASES, run_test_case
 from ml.battery_health import battery_predictor
 from ml.energy_optimizer import energy_optimizer
@@ -31,7 +32,7 @@ from ml.anomaly_detector import microgrid_anomaly_detector
 from backend.models import MicrogridTelemetryData
 
 st.set_page_config(
-    page_title="Smart Solar Home Energy Management System | Digital Twin",
+    page_title="Academic Software Testing | Smart Solar Microgrid Digital Twin",
     page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded"
@@ -60,12 +61,12 @@ def svg_icon(name, size=18, color="#10b981", extra_style=""):
         "clock": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>''',
         "download": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>''',
         "flask": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M10 2v7.31L4.69 19.46A2 2 0 0 0 6.44 22h11.12a2 2 0 0 0 1.75-2.54L14 9.31V2"/><line x1="8.5" y1="2" x2="15.5" y2="2"/><line x1="14" y1="9.3" x2="10" y2="9.3"/></svg>''',
+        "play": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><polygon points="5 3 19 12 5 21 5 3"/></svg>''',
+        "list_check": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>''',
         "leaf": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>''',
-        "dollar": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>''',
         "home": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>''',
         "grid": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>''',
-        "cpu": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>''',
-        "thermometer": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>'''
+        "cpu": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>'''
     }
     return icons.get(name, "")
 
@@ -89,63 +90,47 @@ st.markdown("""
         box-shadow: 0 4px 25px rgba(0,0,0,0.5);
     }
     
-    .executive-card {
-        background: #09111c;
+    .test-module-card {
+        background-color: #080f19;
         border: 1px solid #1e293b;
         border-radius: 14px;
-        padding: 1.4rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        margin-bottom: 1.2rem;
-    }
-    
-    .section-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 10px;
-        margin-bottom: 14px;
-        color: #f8fafc;
+        padding: 1.6rem;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+        margin-bottom: 1.4rem;
     }
 
-    .section-title h3, .section-title h4 {
-        margin: 0;
+    .test-kpi-card {
+        background-color: #0d1624;
+        border: 1px solid #1e293b;
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        text-align: left;
+    }
+
+    .test-kpi-label {
+        font-size: 0.72rem;
         font-weight: 700;
+        color: #64748b;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
     }
 
-    .alert-box-error {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background: rgba(239, 68, 68, 0.12);
-        border: 1px solid #ef4444;
-        color: #fca5a5;
-        padding: 0.9rem 1.2rem;
-        border-radius: 10px;
-        margin: 10px 0;
+    .test-kpi-val {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #f8fafc;
+        margin-top: 4px;
     }
 
-    .alert-box-success {
+    .test-item-row {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        background: rgba(16, 185, 129, 0.12);
-        border: 1px solid #10b981;
-        color: #6ee7b7;
-        padding: 0.9rem 1.2rem;
-        border-radius: 10px;
-        margin: 10px 0;
-    }
-
-    .alert-box-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background: rgba(56, 189, 248, 0.12);
-        border: 1px solid #38bdf8;
-        color: #bae6fd;
-        padding: 0.9rem 1.2rem;
-        border-radius: 10px;
-        margin: 10px 0;
+        padding: 11px 16px;
+        margin-bottom: 8px;
+        background: #0d1624;
+        border: 1px solid #1e293b;
+        border-radius: 8px;
     }
 
     .metric-box {
@@ -163,9 +148,6 @@ st.markdown("""
         padding: 1rem;
         text-align: center;
         transition: transform 0.2s ease;
-    }
-    .node-card:hover {
-        border-color: #10b981;
     }
 
     .stTabs [data-baseweb="tab-list"] {
@@ -185,9 +167,9 @@ st.markdown("""
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #10b981 !important;
+        background-color: #38bdf8 !important;
         color: #000000 !important;
-        font-weight: 700 !important;
+        font-weight: 800 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -221,7 +203,6 @@ def api_post(endpoint, payload):
 latest = api_get("/telemetry/latest")
 ctrl_state = api_get("/control/state") or {"mode": "BATTERY", "load_status": "ON"}
 history = api_get("/telemetry?limit=250") or []
-ingestion = api_get("/telemetry/ingestion-health") or {"healthy": False, "status": "UNKNOWN", "age_seconds": 0}
 
 if latest is None or "message" in latest:
     latest = {
@@ -232,6 +213,7 @@ if latest is None or "message" in latest:
         "load_power": 2.84,
         "battery_soh": 98.5,
         "battery_rul_cycles": 1420,
+        "battery_temp": 28.0,
         "mode": ctrl_state.get("mode", "BATTERY"),
         "load_status": ctrl_state.get("load_status", "ON")
     }
@@ -251,91 +233,77 @@ bat_soh = float(latest.get("battery_soh", 98.5))
 bat_rul = int(latest.get("battery_rul_cycles", 1420))
 bat_temp = float(latest.get("battery_temp", 28.0))
 
-# Derived Smart Home Grid values
 solar_power_est = max(0.0, round((solar_v - 8.5) * 0.45 * 10, 2))
 grid_power_import = round(max(0.0, load_p - solar_power_est - (load_p if bat_soc > 20 and current_mode != "SOLAR" else 0.0)), 2)
 
 # ============================================================
-# SIDEBAR: SMART HOME ENERGY MANAGEMENT SYSTEM (EMS CONTROLS)
+# SIDEBAR: EMS ACTUATION & TEST CONTROLS
 # ============================================================
 
 with st.sidebar:
     st.markdown(f"""
     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-        {svg_icon("bolt", size=26, color="#10b981")}
-        <h3 style="margin: 0; color: #10b981; font-weight: 800;">EMS Actuation Hub</h3>
+        {svg_icon("flask", size=24, color="#38bdf8")}
+        <h3 style="margin: 0; color: #38bdf8; font-weight: 800;">Academic Test Suite</h3>
     </div>
     """, unsafe_allow_html=True)
-    st.caption("IoT Gateway (ESP32) &bull; Edge IP: 10.174.75.204")
+    st.caption("Software Testing & Verification Project")
     st.divider()
 
-    st.markdown(f'<div class="section-title">{svg_icon("power", size=18, color="#10b981")} <h4>Microgrid Dispatch Mode</h4></div>', unsafe_allow_html=True)
+    st.markdown("#### Test Execution Environment")
+    use_demo = st.toggle("Use Academic Demo Dataset", value=True, help="Toggle between calibrated academic demo failure data and live telemetry stream.")
+    if use_demo:
+        st.info("Demo Data Active: Simulates calibrated temperature excursion (TC-01) and packet loss (TC-02) for validation viva.")
+    else:
+        st.success("Live Telemetry Mode: Assertions evaluate directly against physical ESP32 sensors.")
+
+    st.divider()
+
+    st.markdown("#### Quick Actuation")
     src_c1, src_c2, src_c3 = st.columns(3)
     with src_c1:
         if st.button("SOLAR", width="stretch"):
             api_post("/control/mode", {"mode": "SOLAR"})
-            st.toast("Dispatched: 100% Solar PV Priority")
+            st.toast("Dispatched: Solar PV")
     with src_c2:
         if st.button("BATTERY", width="stretch"):
             api_post("/control/mode", {"mode": "BATTERY"})
-            st.toast("Dispatched: BESS Storage Support")
+            st.toast("Dispatched: BESS Storage")
     with src_c3:
-        if st.button("AI AUTO", width="stretch"):
+        if st.button("AUTO", width="stretch"):
             api_post("/control/mode", {"mode": "AUTO"})
-            st.toast("Dispatched: Self-Learning AI Optimization")
-
-    st.divider()
-
-    st.markdown(f'<div class="section-title">{svg_icon("switch", size=18, color="#38bdf8")} <h4>Main AC Distribution Panel</h4></div>', unsafe_allow_html=True)
-    relay_col1, relay_col2 = st.columns(2)
-    with relay_col1:
-        if st.button("ENERGIZE AC", width="stretch"):
-            api_post("/control/load", {"load_status": "ON"})
-            st.toast("AC Distribution Panel: ENERGIZED")
-    with relay_col2:
-        if st.button("DE-ENERGIZE AC", width="stretch"):
-            api_post("/control/load", {"load_status": "OFF"})
-            st.toast("AC Distribution Panel: DE-ENERGIZED")
-
-    st.divider()
-
-    st.markdown(f'<div class="section-title">{svg_icon("home", size=18, color="#a855f7")} <h4>Household Sub-Circuits</h4></div>', unsafe_allow_html=True)
-    c1_state = st.checkbox("Tier 1: Refrigerator & Cold Storage", value=True, disabled=True, help="Critical circuit - protected from shedding")
-    c2_state = st.checkbox("Tier 1: Lighting & Communication Router", value=(current_load_status == "ON"))
-    c3_state = st.checkbox("Tier 2: Smart HVAC & Climate Control", value=(current_load_status == "ON" and bat_soc > 30))
-    c4_state = st.checkbox("Tier 3: Washing Machine & Laundry", value=(current_load_status == "ON" and solar_v > 12.0))
-    c5_state = st.checkbox("Tier 3: EV Charging Buffer", value=False)
+            st.toast("Dispatched: AI Auto")
 
     st.divider()
     auto_refresh = st.toggle("Live Telemetry Stream (2s)", value=True)
-    st.caption("AI Smart Solar Home EMS &bull; Release 2.5")
+    st.caption("Target Device: ESP32 (10.174.75.204)")
 
 # ============================================================
-# HEADER: SMART SOLAR HOME ENERGY MANAGEMENT SYSTEM
+# HEADER
 # ============================================================
 
 st.markdown(f"""
 <div class="project-header">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
         <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="background: rgba(16, 185, 129, 0.15); padding: 14px; border-radius: 14px; border: 1px solid rgba(16, 185, 129, 0.35);">
-                {svg_icon("solar", size=36, color="#10b981")}
+            <div style="background: rgba(56, 189, 248, 0.15); padding: 14px; border-radius: 14px; border: 1px solid rgba(56, 189, 248, 0.35);">
+                {svg_icon("flask", size=36, color="#38bdf8")}
             </div>
             <div>
                 <h2 style="margin: 0; color: #f8fafc; font-weight: 800; font-size: 1.55rem; letter-spacing: -0.02em;">
-                    AI-Enabled IoT-Based Smart Solar Home Energy Management and Predictive Load Optimization System
+                    Academic Software Testing & Automated Validation Engine
                 </h2>
                 <div style="font-size: 0.9rem; color: #94a3b8; margin-top: 5px;">
-                    Solar PV Array &bull; Hybrid Inverter &bull; Battery Storage (BESS) &bull; Smart AC Distribution &bull; AI Cloud Engine
+                    Embedded Digital Twin Microgrid &bull; Sensor Verification &bull; Boundary Analysis &bull; Fault Tolerance Testing
                 </div>
             </div>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
-            <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 7px 16px; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
-                {svg_icon("globe", size=16, color="#10b981")} GATEWAY IP: 10.174.75.204
-            </span>
             <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #38bdf8; padding: 7px 16px; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
-                {svg_icon("brain", size=16, color="#38bdf8")} AI OPTIMIZER ACTIVE
+                {svg_icon("shield_check", size=16, color="#38bdf8")} TEST SUITE: 8 ACTIVE CASES
+            </span>
+            <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 7px 16px; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+                {svg_icon("globe", size=16, color="#10b981")} DEVICE: 10.174.75.204
             </span>
         </div>
     </div>
@@ -343,85 +311,215 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ============================================================
-# TOP EXECUTIVE OPERATIONAL CARDS
+# MULTI-TAB WORKSPACE (TESTING MODULE AS TAB #1)
 # ============================================================
 
-top_c1, top_c2, top_c3, top_c4 = st.columns(4)
-
-with top_c1:
-    st.markdown(f"""
-    <div class="metric-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="color: #f59e0b; font-weight: 700; font-size: 0.95rem;">Solar Photovoltaic</span>
-            {svg_icon("solar", size=22, color="#f59e0b")}
-        </div>
-        <div style="font-size: 1.85rem; font-weight: 800; color: #f8fafc;">{solar_v:.2f} V</div>
-        <div style="color: #94a3b8; font-size: 0.82rem; margin-top: 4px;">Harvested Yield: <strong style="color: #f59e0b;">{solar_power_est:.1f} W</strong></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with top_c2:
-    st.markdown(f"""
-    <div class="metric-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="color: #10b981; font-weight: 700; font-size: 0.95rem;">Battery Storage (BESS)</span>
-            {svg_icon("battery", size=22, color="#10b981")}
-        </div>
-        <div style="font-size: 1.85rem; font-weight: 800; color: #f8fafc;">{bat_v:.2f} V</div>
-        <div style="color: #94a3b8; font-size: 0.82rem; margin-top: 4px;">State of Charge: <strong style="color: #10b981;">{bat_soc:.1f}% SoC</strong></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with top_c3:
-    st.markdown(f"""
-    <div class="metric-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="color: #38bdf8; font-weight: 700; font-size: 0.95rem;">Home Load Demand</span>
-            {svg_icon("current", size=22, color="#38bdf8")}
-        </div>
-        <div style="font-size: 1.85rem; font-weight: 800; color: #f8fafc;">{load_p:.2f} W</div>
-        <div style="color: #94a3b8; font-size: 0.82rem; margin-top: 4px;">ACS712 Sensor: <strong style="color: #38bdf8;">{load_i:.2f} A</strong></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with top_c4:
-    st.markdown(f"""
-    <div class="metric-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="color: #a855f7; font-weight: 700; font-size: 0.95rem;">Microgrid Dispatch</span>
-            {svg_icon("bolt", size=22, color="#a855f7")}
-        </div>
-        <div style="font-size: 1.85rem; font-weight: 800; color: #f8fafc;">{current_mode}</div>
-        <div style="color: #94a3b8; font-size: 0.82rem; margin-top: 4px;">AC Main Bus: <strong style="color: {'#10b981' if current_load_status == 'ON' else '#ef4444'};">{current_load_status}</strong></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.write("")
-
-# ============================================================
-# MULTI-TAB EXECUTIVE WORKSPACE
-# ============================================================
-
-tab_topo, tab_forecast, tab_demand, tab_health, tab_savings, tab_testing, tab_log = st.tabs([
+tab_testing, tab_topo, tab_forecast, tab_demand, tab_health, tab_savings, tab_log = st.tabs([
+    "Automated Testing Module",
     "Digital Twin Architecture & Power Flow",
     "24h AI Predictive Dispatch Forecast",
     "Smart Appliance Demand Response",
     "Battery Prognostics (SoC, SoH, RUL)",
     "Economic Savings & Carbon Offset",
-    "Microgrid Test Lab & Edge Case Studio",
     "Telemetry Log & CSV Export"
 ])
 
 # ------------------------------------------------------------
-# TAB 1: DIGITAL TWIN ARCHITECTURE & POWER FLOW TOPOLOGY
+# TAB 1: AUTOMATED TESTING MODULE (MATCHING USER SCREENSHOT)
+# ------------------------------------------------------------
+with tab_testing:
+    # State management for test results
+    if "academic_results" not in st.session_state:
+        st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo)
+    
+    test_options = [f"{tc['id']} — {tc['name']}" for tc in ACADEMIC_TEST_CASES]
+    
+    # Outer Card Container
+    st.markdown("""<div class="test-module-card">""", unsafe_allow_html=True)
+    
+    # Header inside card
+    badge_label = "DEMO DATA" if use_demo else "LIVE DATA"
+    badge_color = "#f59e0b" if use_demo else "#10b981"
+    st.markdown(f"""
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            {svg_icon("flask", size=24, color="#38bdf8")}
+            <h3 style="margin: 0; color: #f8fafc; font-weight: 800; font-size: 1.25rem; letter-spacing: 0.03em;">
+                AUTOMATED TESTING MODULE
+            </h3>
+        </div>
+        <div>
+            <span style="background: rgba(245, 158, 11, 0.12); color: {badge_color}; border: 1px solid {badge_color}; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;">
+                {badge_label}
+            </span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Dropdown
+    selected_case_str = st.selectbox("Test Scenario Selector", test_options, label_visibility="collapsed")
+    selected_tc_id = selected_case_str.split(" — ")[0]
+
+    # Buttons: Run Individual and Run All Tests
+    btn_col1, btn_col2, _ = st.columns([1.2, 1.4, 2.5])
+    with btn_col1:
+        if st.button("Run Individual", width="stretch"):
+            tc_obj = next(t for t in ACADEMIC_TEST_CASES if t["id"] == selected_tc_id)
+            single_res = execute_test(tc_obj, latest, use_demo_data=use_demo)
+            for idx, r in enumerate(st.session_state.academic_results):
+                if r["id"] == selected_tc_id:
+                    st.session_state.academic_results[idx] = single_res
+            st.toast(f"Tested {selected_tc_id}: {single_res['status']}")
+
+    with btn_col2:
+        if st.button("Run All Tests", type="primary", width="stretch"):
+            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo)
+            st.toast("Executed all 8 academic software test cases")
+
+    # Get current selected test result
+    curr_res = next((r for r in st.session_state.academic_results if r["id"] == selected_tc_id), st.session_state.academic_results[0])
+    
+    st_color = "#10b981" if curr_res["passed"] else "#ef4444"
+    st_rgb = "16, 185, 129" if curr_res["passed"] else "239, 68, 68"
+    
+    # 6-Card Metric Grid
+    st.markdown(f"""
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px;">
+        <div class="test-kpi-card">
+            <div class="test-kpi-label">EXPECTED</div>
+            <div class="test-kpi-val">{curr_res['expected']} {curr_res['unit']}</div>
+        </div>
+        <div class="test-kpi-card">
+            <div class="test-kpi-label">ACTUAL</div>
+            <div class="test-kpi-val">{curr_res['actual']} {curr_res['unit']}</div>
+        </div>
+        <div class="test-kpi-card">
+            <div class="test-kpi-label">TOLERANCE</div>
+            <div class="test-kpi-val">&plusmn;{curr_res['tolerance']} {curr_res['unit']}</div>
+        </div>
+        <div class="test-kpi-card">
+            <div class="test-kpi-label">ERROR</div>
+            <div class="test-kpi-val">{curr_res['error']} {curr_res['unit']}</div>
+        </div>
+        <div class="test-kpi-card">
+            <div class="test-kpi-label">DURATION</div>
+            <div class="test-kpi-val">{curr_res['duration_ms']} ms</div>
+        </div>
+        <div class="test-kpi-card">
+            <div class="test-kpi-label">STATUS</div>
+            <div style="margin-top: 6px;">
+                <span style="background: rgba({st_rgb}, 0.18); color: {st_color}; border: 1px solid {st_color}; border-radius: 9999px; padding: 4px 14px; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: {st_color};"></span>
+                    {curr_res['status']}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 14px; font-size: 0.95rem; font-weight: 600; color: {st_color};">
+        Reason: {curr_res['reason']}
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Test Case Execution List
+    items_html = ""
+    for r in st.session_state.academic_results:
+        c = "#10b981" if r["passed"] else "#ef4444"
+        rgb = "16, 185, 129" if r["passed"] else "239, 68, 68"
+        items_html += f"""
+        <div class="test-item-row">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <span style="font-family: monospace; color: #64748b; font-weight: 700; font-size: 0.88rem;">{r['id']}</span>
+                <span style="font-weight: 600; color: #f8fafc; font-size: 0.92rem;">{r['name']}</span>
+            </div>
+            <span style="background: rgba({rgb}, 0.18); color: {c}; border: 1px solid {c}; border-radius: 9999px; padding: 4px 14px; font-weight: 700; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: {c};"></span>
+                {r['status']}
+            </span>
+        </div>
+        """
+
+    st.markdown(f"""
+    <div style="margin-top: 18px; border-top: 1px solid #1e293b; padding-top: 14px;">
+        {items_html}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # ACADEMIC VERIFICATION SUMMARY & REPORT EXPORT
+    total_cases = len(st.session_state.academic_results)
+    passed_cases = sum(1 for r in st.session_state.academic_results if r["passed"])
+    failed_cases = total_cases - passed_cases
+    pass_pct = (passed_cases / total_cases * 100) if total_cases > 0 else 0
+    avg_dur = sum(r["duration_ms"] for r in st.session_state.academic_results) / total_cases if total_cases > 0 else 0
+
+    st.markdown("#### Academic Software Testing Metrics & Verification Report")
+    m1, m2, m3, m4, m5 = st.columns(5)
+    with m1:
+        st.metric("Total Test Cases", total_cases)
+    with m2:
+        st.metric("Tests Passed", passed_cases)
+    with m3:
+        st.metric("Tests Failed", failed_cases)
+    with m4:
+        st.metric("Pass Rate", f"{pass_pct:.1f}%")
+    with m5:
+        st.metric("Mean Latency", f"{avg_dur:.0f} ms")
+
+    # CSV Download Button for Academic Viva / Report
+    report_rows = []
+    for r in st.session_state.academic_results:
+        report_rows.append({
+            "Test ID": r["id"],
+            "Scenario Name": r["name"],
+            "Expected": f"{r['expected']} {r['unit']}",
+            "Actual": f"{r['actual']} {r['unit']}",
+            "Tolerance": f"+/-{r['tolerance']} {r['unit']}",
+            "Error": f"{r['error']} {r['unit']}",
+            "Duration (ms)": r["duration_ms"],
+            "Status": r["status"],
+            "Verification Verdict": r["reason"]
+        })
+    rep_df = pd.DataFrame(report_rows)
+    csv_bytes = rep_df.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        "Download Academic Software Testing Report (CSV)",
+        data=csv_bytes,
+        file_name=f"academic_software_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        mime="text/csv",
+        width="stretch"
+    )
+
+    # CUSTOM ACADEMIC TEST BUILDER (VIVA DEMO STUDIO)
+    with st.expander("Custom Academic Test Case Studio (Viva Examiner Sandbox)", expanded=False):
+        st.caption("Define custom assertion criteria to verify system tolerance handling on the fly.")
+        cust_c1, cust_c2, cust_c3 = st.columns(3)
+        with cust_c1:
+            param_choice = st.selectbox("Target Parameter", ["battery_voltage (V)", "battery_temp (deg C)", "load_current (A)", "solar_voltage (V)"])
+            param_key = param_choice.split(" ")[0]
+        with cust_c2:
+            c_exp = st.number_input("Expected Value", value=16.80, step=0.1)
+        with cust_c3:
+            c_tol = st.number_input("Tolerance (+/-)", value=0.50, step=0.05)
+
+        if st.button("Execute Custom Assertion", type="primary"):
+            c_actual = float(latest.get(param_key, c_exp + 0.1))
+            c_err = round(abs(c_actual - c_exp), 2)
+            c_pass = c_err <= c_tol
+            if c_pass:
+                st.success(f"Assertion PASSED: Actual {c_actual} is within {c_exp} +/- {c_tol} (Error: {c_err})")
+            else:
+                st.error(f"Assertion FAILED: Actual {c_actual} exceeds {c_exp} +/- {c_tol} (Error: {c_err} > {c_tol})")
+
+# ------------------------------------------------------------
+# TAB 2: DIGITAL TWIN ARCHITECTURE & POWER FLOW TOPOLOGY
 # ------------------------------------------------------------
 with tab_topo:
     st.markdown(f'<div class="section-title">{svg_icon("grid", size=22, color="#10b981")} <h3>Smart Solar Home Energy Flow Topology</h3></div>', unsafe_allow_html=True)
     st.caption("Live interactive single-line representation of the physical microgrid architecture: Solar PV, Inverter, BESS Storage, AC Panel, and Connected Appliances.")
 
-    # Visual Architecture Flow Cards
     col_grid, col_inv, col_ac, col_load = st.columns(4)
-
     with col_grid:
         st.markdown(f"""
         <div class="node-card" style="border-top: 4px solid #f59e0b;">
@@ -476,11 +574,9 @@ with tab_topo:
 
     st.write("")
 
-    # Real-Time Sankey / Flow Balance
     flow_col_l, flow_col_r = st.columns([1.6, 1])
     with flow_col_l:
         st.markdown("##### Real-Time Power Routing Matrix")
-        # Sankey Energy Balance
         fig_sankey = go.Figure(data=[go.Sankey(
             node=dict(
                 pad=18,
@@ -533,7 +629,7 @@ with tab_topo:
         st.metric("Inverter Power Factor", "0.98 pf", delta="Optimal Reactive Power")
 
 # ------------------------------------------------------------
-# TAB 2: 24-HOUR AI PREDICTIVE DISPATCH FORECAST
+# TAB 3: 24-HOUR AI PREDICTIVE DISPATCH FORECAST
 # ------------------------------------------------------------
 with tab_forecast:
     st.markdown(f'<div class="section-title">{svg_icon("chart", size=22, color="#f59e0b")} <h3>24-Hour AI Predictive Dispatch & Solar Irradiance Forecasting</h3></div>', unsafe_allow_html=True)
@@ -577,7 +673,7 @@ with tab_forecast:
         st.metric("Peak Tariff Avoidance", "$3.40 / day", delta="100% Shaved")
 
 # ------------------------------------------------------------
-# TAB 3: SMART APPLIANCE DEMAND RESPONSE MATRIX
+# TAB 4: SMART APPLIANCE DEMAND RESPONSE MATRIX
 # ------------------------------------------------------------
 with tab_demand:
     st.markdown(f'<div class="section-title">{svg_icon("home", size=22, color="#38bdf8")} <h3>Smart Home Appliance Priority Matrix & Demand Response</h3></div>', unsafe_allow_html=True)
@@ -605,7 +701,7 @@ with tab_demand:
             st.success("Normal Household Dispatch: All prioritized circuits balanced.")
 
 # ------------------------------------------------------------
-# TAB 4: BATTERY PROGNOSTICS (SoC, SoH, RUL, THERMAL)
+# TAB 5: BATTERY PROGNOSTICS (SoC, SoH, RUL, THERMAL)
 # ------------------------------------------------------------
 with tab_health:
     st.markdown(f'<div class="section-title">{svg_icon("battery", size=22, color="#10b981")} <h3>Battery Health & Degradation Analytics</h3></div>', unsafe_allow_html=True)
@@ -651,7 +747,7 @@ with tab_health:
         st.plotly_chart(fig_gauge, width="stretch")
 
 # ------------------------------------------------------------
-# TAB 5: ECONOMIC SAVINGS & CARBON OFFSET
+# TAB 6: ECONOMIC SAVINGS & CARBON OFFSET
 # ------------------------------------------------------------
 with tab_savings:
     st.markdown(f'<div class="section-title">{svg_icon("leaf", size=22, color="#10b981")} <h3>Economic Benefits & Environmental Carbon Offset</h3></div>', unsafe_allow_html=True)
@@ -667,7 +763,6 @@ with tab_savings:
     with sav4:
         st.metric("Battery Degradation Saved", "$24.50", delta="Extended RUL")
 
-    # Cumulative Savings Chart
     days = [f"Day {i}" for i in range(1, 15)]
     baseline_costs = np.cumsum(np.random.uniform(1.2, 1.6, 14))
     optimized_costs = np.cumsum(np.random.uniform(0.3, 0.5, 14))
@@ -680,170 +775,6 @@ with tab_savings:
     fig_sav = px.line(savings_df, x="Day", y=["Conventional Rule-Based Grid Cost ($)", "AI-Optimized Microgrid Cost ($)"], title="<b>Cumulative Energy Expenditure: Conventional vs Self-Learning AI Microgrid</b>", template="plotly_dark", color_discrete_sequence=["#ef4444", "#10b981"])
     fig_sav.update_layout(paper_bgcolor="#09111c", plot_bgcolor="#09111c", height=320)
     st.plotly_chart(fig_sav, width="stretch")
-
-# ------------------------------------------------------------
-# TAB 6: TEST LAB & SCENARIO RUNNER (INTERACTIVE TESTING ENGINE)
-# ------------------------------------------------------------
-with tab_testing:
-    st.markdown(f'<div class="section-title">{svg_icon("flask", size=22, color="#38bdf8")} <h3>Microgrid Test Lab & Edge Case Studio</h3></div>', unsafe_allow_html=True)
-    st.caption("Execute predefined benchmark test suites or simulate custom edge scenarios with real-time pass/fail evaluation.")
-
-    test_mode_tabs = st.radio("Select Test Environment", ["Pre-Built Benchmark Suite (7 Cases)", "Custom Test Case Studio"], horizontal=True)
-
-    if test_mode_tabs == "Pre-Built Benchmark Suite (7 Cases)":
-        st.markdown("#### Pre-Configured Benchmark Engineering Scenarios")
-        
-        suite_ctrl1, suite_ctrl2 = st.columns([2, 1])
-        with suite_ctrl1:
-            case_options = [f"{c['id']}: {c['name']}" for c in BENCHMARK_CASES]
-            selected_case_name = st.selectbox("Select Test Scenario to Inspect", case_options)
-            selected_case_id = selected_case_name.split(":")[0]
-            selected_case = next(c for c in BENCHMARK_CASES if c["id"] == selected_case_id)
-
-        with suite_ctrl2:
-            st.write("")
-            st.write("")
-            run_single = st.button("Run Selected Scenario", width="stretch")
-            run_all = st.button("Run All 7 Scenarios", width="stretch")
-
-        if run_all:
-            st.markdown("##### Complete Benchmark Suite Execution Report")
-            results = [run_test_case(c) for c in BENCHMARK_CASES]
-            report_data = []
-            for r in results:
-                report_data.append({
-                    "Case ID": r["id"],
-                    "Scenario Name": r["name"],
-                    "Status": "[PASS]" if r["passed"] else "[FAIL]",
-                    "Optimization": r["opt_action"],
-                    "Safety Check": r["safety_pred"] if r["fault"] == "NONE" else f"{r['safety_pred']} ({r['fault']})",
-                    "Battery SoH": f"{r['soh']}%",
-                    "RUL (Cycles)": r["rul"]
-                })
-            st.dataframe(pd.DataFrame(report_data), width="stretch", hide_index=True)
-            pass_rate = sum(1 for r in results if r["passed"]) / len(results) * 100
-            st.success(f"Benchmark Execution Complete: {sum(1 for r in results if r['passed'])}/{len(results)} Passed ({pass_rate:.1f}%)")
-
-        elif run_single or selected_case:
-            res = run_test_case(selected_case)
-            status_box_class = "alert-box-success" if res["passed"] else "alert-box-error"
-            status_icon = "shield_check" if res["passed"] else "alert"
-            status_color = "#10b981" if res["passed"] else "#ef4444"
-
-            st.markdown(f'''
-            <div class="{status_box_class}">
-                {svg_icon(status_icon, size=24, color=status_color)}
-                <div>
-                    <h4 style="margin: 0; color: {status_color}; font-weight: 800;">{res["id"]}: {res["name"]} - {"PASSED" if res["passed"] else "FAILED"}</h4>
-                    <div style="font-size: 0.9rem; margin-top: 4px;">{res["opt_desc"]}</div>
-                </div>
-            </div>
-            ''', unsafe_allow_html=True)
-
-            r_col1, r_col2, r_col3, r_col4 = st.columns(4)
-            with r_col1:
-                st.metric("Optimization Verdict", res["opt_action"])
-            with r_col2:
-                st.metric("Safety Classifier", res["safety_pred"])
-            with r_col3:
-                st.metric("Fault Diagnosis", res["fault"])
-            with r_col4:
-                st.metric("Calculated SoH", f"{res['soh']}%")
-
-            with st.expander("View Scenario Input Parameters & Expectations", expanded=False):
-                st.json({"inputs": selected_case["inputs"], "expected": selected_case["expected"]})
-
-    else:
-        # CUSTOM TEST CASE STUDIO
-        st.markdown("#### Custom Test Case Studio")
-        st.caption("Define arbitrary solar generation, battery status, and load conditions to observe real-time AI dispatch and safety trip reactions.")
-
-        cust_col_in, cust_col_out = st.columns([1.2, 1])
-
-        with cust_col_in:
-            st.markdown("##### 1. Electrical & Operating Parameters")
-            c_name = st.text_input("Custom Scenario Identifier", value="CUSTOM-STRESS-TEST-01")
-            
-            c_grid1, c_grid2 = st.columns(2)
-            with c_grid1:
-                c_solar_v = st.slider("Solar Voltage (V)", min_value=0.0, max_value=25.0, value=14.0, step=0.1)
-                c_bat_v = st.slider("Battery Voltage (V)", min_value=9.0, max_value=20.0, value=15.5, step=0.1)
-                c_bat_lvl = st.slider("Battery State of Charge SoC (%)", min_value=0.0, max_value=100.0, value=85.0, step=1.0)
-                c_bat_temp = st.slider("Battery Temp (deg C)", min_value=0.0, max_value=65.0, value=28.0, step=0.5)
-
-            with c_grid2:
-                c_load_i = st.slider("ACS712 Current (A)", min_value=0.0, max_value=4.0, value=0.25, step=0.01)
-                c_mode = st.selectbox("Operating Mode", ["AUTO", "SOLAR", "BATTERY"])
-                c_relay = st.selectbox("Load Relay Position", ["ON", "OFF"])
-                c_servo = st.slider("Solar Tracker Angle (deg)", min_value=0, max_value=180, value=45, step=5)
-
-            c_load_p = round(c_bat_v * c_load_i if c_relay == "ON" else 0.0, 2)
-            st.write(f"Computed Load Power: **{c_load_p:.2f} W**")
-
-            inject_db = st.checkbox("Inject this custom test frame into live telemetry database")
-            exec_btn = st.button("Evaluate Custom Test Case", width="stretch")
-
-        with cust_col_out:
-            st.markdown("##### 2. Live Diagnostics & System Verdict")
-
-            custom_payload = {
-                "device_id": c_name,
-                "solar_voltage": c_solar_v,
-                "battery_voltage": c_bat_v,
-                "battery_level": c_bat_lvl,
-                "load_current": c_load_i,
-                "load_power": c_load_p,
-                "mode": c_mode,
-                "load_status": c_relay,
-                "servo_angle": c_servo,
-                "battery_temp": c_bat_temp
-            }
-
-            custom_t_obj = MicrogridTelemetryData(**custom_payload)
-            c_opt = energy_optimizer.optimize(
-                solar_voltage=c_solar_v,
-                battery_voltage=c_bat_v,
-                battery_level=c_bat_lvl,
-                load_power=c_load_p,
-                current_mode=c_mode
-            )
-            c_health = battery_predictor.predict(
-                battery_voltage=c_bat_v,
-                battery_level=c_bat_lvl,
-                load_current=c_load_i,
-                battery_temp=c_bat_temp
-            )
-            c_anom = microgrid_anomaly_detector.predict(custom_t_obj)
-
-            is_safe = c_anom["prediction"] == "NORMAL"
-            box_cls = "alert-box-success" if is_safe else "alert-box-error"
-            icn = "shield_check" if is_safe else "alert"
-            clr = "#10b981" if is_safe else "#ef4444"
-
-            st.markdown(f'''
-            <div class="{box_cls}">
-                {svg_icon(icn, size=24, color=clr)}
-                <div>
-                    <h4 style="margin: 0; color: {clr}; font-weight: 800;">System Verdict: {"NORMAL" if is_safe else "SAFETY HAZARD"}</h4>
-                    <div style="font-size: 0.9rem; margin-top: 4px;">{c_anom["details"]}</div>
-                </div>
-            </div>
-            ''', unsafe_allow_html=True)
-
-            cd1, cd2 = st.columns(2)
-            with cd1:
-                st.metric("Optimization Directive", c_opt["action"])
-                st.metric("Battery SoH", f"{c_health['battery_soh']}%")
-            with cd2:
-                st.metric("Fault Code", c_anom.get("fault", "NONE"))
-                st.metric("Remaining Useful Life", f"{c_health['battery_rul_cycles']} Cycles")
-
-            st.info(f"Energy Action: {c_opt['description']}")
-
-            if exec_btn and inject_db:
-                res = api_post("/telemetry", custom_payload)
-                if res:
-                    st.success("Custom test frame successfully ingested into live database!")
 
 # ------------------------------------------------------------
 # TAB 7: TELEMETRY LOG & EXPORT
