@@ -1,0 +1,12 @@
+.git
+.github
+.devcontainer
+__pycache__
+*.pyc
+simulator/
+dashboard/
+hardware/
+data/training_dataset.csv
+ml/model_comparison.py
+ml/train_model.py
+.venv
