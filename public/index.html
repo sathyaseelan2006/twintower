@@ -10,240 +10,233 @@
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <style>
         body {
-            background-color: #060b11;
+            background-color: #060a12;
             color: #e2e8f0;
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
         .card-dark {
-            background-color: #09111c;
+            background-color: #0b1320;
             border: 1px solid #1e293b;
-            border-radius: 12px;
+            border-radius: 14px;
         }
         .test-card {
             background-color: #080f19;
             border: 1px solid #1e293b;
             border-radius: 14px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
         }
         .test-metric-box {
             background-color: #0d1624;
             border: 1px solid #1e293b;
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 14px 16px;
         }
         .card-node {
-            background-color: #0f1c2d;
-            border: 1px solid #254061;
-            border-radius: 10px;
+            background-color: #0d1624;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
             transition: all 0.2s ease;
         }
         .card-node:hover {
-            border-color: #10b981;
+            border-color: #38bdf8;
             transform: translateY(-2px);
         }
+        .tab-btn {
+            background-color: #0b1320;
+            color: #94a3b8;
+            border: 1px solid #1e293b;
+            border-bottom: none;
+            transition: all 0.2s ease;
+        }
+        .tab-btn:hover {
+            color: #ffffff;
+            background-color: #111e33;
+        }
         .tab-btn.active {
-            background-color: #38bdf8;
-            color: #060b11;
-            font-weight: 800;
+            background-color: #38bdf8 !important;
+            color: #060b11 !important;
+            font-weight: 800 !important;
+            border-color: #38bdf8 !important;
+        }
+        /* Pulse dot animation */
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+        .pulse-active {
+            animation: pulse-dot 2s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-6 lg:p-8">
+<body class="min-h-screen p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
 
-    <!-- TOP HEADER -->
-    <header class="card-dark p-6 mb-6 border-slate-800 shadow-2xl">
+    <!-- TOP EXECUTIVE HEADER -->
+    <header class="card-dark p-5 md:p-6 mb-6 shadow-2xl border-slate-800">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div class="flex items-center gap-4">
-                <div class="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl">
-                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31L4.69 19.46A2 2 0 0 0 6.44 22h11.12a2 2 0 0 0 1.75-2.54L14 9.31V2"/><line x1="8.5" y1="2" x2="15.5" y2="2"/></svg>
+                <div class="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl flex items-center justify-center">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31L4.69 19.46A2 2 0 0 0 6.44 22h11.12a2 2 0 0 0 1.75-2.54L14 9.31V2"/><line x1="8.5" y1="2" x2="15.5" y2="2"/></svg>
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-extrabold text-white tracking-tight">
-                        Academic Software Testing & Automated Validation Engine
-                    </h1>
-                    <p class="text-sm text-slate-400 mt-1">
-                        Embedded Digital Twin Microgrid &bull; Sensor Verification &bull; Boundary Analysis &bull; Tolerance & Latency Audits
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">
+                            Academic Software Testing & Automated Validation Engine
+                        </h1>
+                        <span class="bg-sky-500/20 text-sky-400 text-[10px] font-extrabold px-2 py-0.5 rounded border border-sky-500/40 uppercase">v2.4</span>
+                    </div>
+                    <p class="text-xs md:text-sm text-slate-400 mt-1">
+                        Embedded Digital Twin Microgrid &bull; Sensor Verification &bull; Boundary Analysis &bull; Fault Tolerance Audits
                     </p>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex items-center gap-2 bg-sky-500/10 border border-sky-500/40 text-sky-400 px-3 py-1.5 rounded-full text-xs font-bold tracking-wide">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <span class="inline-flex items-center gap-2 bg-sky-500/10 border border-sky-500/40 text-sky-400 px-3 py-1.5 rounded-full text-xs font-bold">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                     TEST SUITE: 8 ACTIVE CASES
                 </span>
-                <span class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold tracking-wide">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                    GATEWAY IP: 10.174.75.204
+                <span class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    ESP32: 10.174.75.204
                 </span>
-                <span id="api-status" class="inline-flex items-center gap-1.5 bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Vercel API Connected
+                <span class="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-700/80 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-active"></span> Vercel API Active
                 </span>
             </div>
         </div>
     </header>
 
-    <!-- MAIN GRID: LEFT SIDEBAR + RIGHT WORKSPACE -->
+    <!-- MAIN TWO-COLUMN WORKSPACE: LEFT CONTROL SIDEBAR + RIGHT TESTING PANE -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-        <!-- SIDEBAR: EMS & TEST CONTROLS -->
-        <aside class="lg:col-span-1 space-y-6">
-            <!-- Test Environment Selector -->
-            <div class="card-dark p-5">
+        <!-- LEFT SIDEBAR: EMS ACTUATION & ENVIRONMENT -->
+        <aside class="lg:col-span-1 space-y-5">
+            <!-- Test Environment Mode -->
+            <div class="card-dark p-4 md:p-5">
                 <div class="flex items-center gap-2 mb-3">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31L4.69 19.46A2 2 0 0 0 6.44 22h11.12a2 2 0 0 0 1.75-2.54L14 9.31V2"/></svg>
-                    <h2 class="text-sm font-bold text-white tracking-wide">Test Environment</h2>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M10 2v7.31L4.69 19.46A2 2 0 0 0 6.44 22h11.12a2 2 0 0 0 1.75-2.54L14 9.31V2"/></svg>
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-300">Test Execution Mode</h2>
                 </div>
                 <div class="space-y-2">
-                    <button onclick="setTestEnv(true)" id="btn-env-demo" class="w-full py-2 px-3 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-lg text-xs font-bold text-left flex justify-between items-center">
-                        <span>Academic Demo Dataset</span>
+                    <button onclick="setTestEnv(true)" id="btn-env-demo" class="w-full py-2.5 px-3 bg-amber-500/15 text-amber-400 border border-amber-500/50 rounded-lg text-xs font-bold text-left flex justify-between items-center transition">
+                        <span>Academic Demo Failure Benchmarks</span>
                         <span class="w-2 h-2 rounded-full bg-amber-400"></span>
                     </button>
-                    <button onclick="setTestEnv(false)" id="btn-env-live" class="w-full py-2 px-3 bg-slate-800 text-slate-400 border border-slate-700 hover:text-white rounded-lg text-xs font-bold text-left flex justify-between items-center">
-                        <span>Live Telemetry Stream</span>
+                    <button onclick="setTestEnv(false)" id="btn-env-live" class="w-full py-2.5 px-3 bg-slate-900 text-slate-400 border border-slate-800 hover:text-white rounded-lg text-xs font-bold text-left flex justify-between items-center transition">
+                        <span>Live Hardware Sensor Telemetry</span>
                         <span class="w-2 h-2 rounded-full bg-slate-600"></span>
                     </button>
                 </div>
-                <p id="env-desc" class="text-[11px] text-slate-400 mt-2.5">
-                    Demo Mode: Uses calibrated academic failure benchmarks (TC-01, TC-02, TC-03) for viva demonstration.
+                <p id="env-desc" class="text-[11px] text-slate-400 mt-2.5 leading-relaxed">
+                    Demo Mode Active: Injects calibrated sensor drift (TC-01) and communication drop (TC-02) for examiner evaluation viva.
                 </p>
             </div>
 
-            <!-- Mode Switcher -->
-            <div class="card-dark p-5">
+            <!-- Quick Microgrid Dispatch -->
+            <div class="card-dark p-4 md:p-5">
                 <div class="flex items-center gap-2 mb-3">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    <h2 class="text-sm font-bold text-white tracking-wide">Microgrid Dispatch Mode</h2>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-300">EMS Dispatch Mode</h2>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                    <button onclick="setMode('SOLAR')" class="px-2 py-2 bg-slate-800 hover:bg-amber-600/30 text-amber-400 border border-slate-700 rounded-lg text-xs font-bold transition">SOLAR</button>
-                    <button onclick="setMode('BATTERY')" class="px-2 py-2 bg-slate-800 hover:bg-emerald-600/30 text-emerald-400 border border-slate-700 rounded-lg text-xs font-bold transition">BATTERY</button>
-                    <button onclick="setMode('AUTO')" class="px-2 py-2 bg-slate-800 hover:bg-sky-600/30 text-sky-400 border border-slate-700 rounded-lg text-xs font-bold transition">AI AUTO</button>
+                    <button onclick="setMode('SOLAR')" class="py-2 bg-slate-900 hover:bg-amber-500/20 text-amber-400 border border-slate-800 rounded-lg text-xs font-bold transition">SOLAR</button>
+                    <button onclick="setMode('BATTERY')" class="py-2 bg-slate-900 hover:bg-emerald-500/20 text-emerald-400 border border-slate-800 rounded-lg text-xs font-bold transition">BATTERY</button>
+                    <button onclick="setMode('AUTO')" class="py-2 bg-slate-900 hover:bg-sky-500/20 text-sky-400 border border-slate-800 rounded-lg text-xs font-bold transition">AI AUTO</button>
+                </div>
+                <div class="mt-3 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-2.5">
+                    <span>Active Inverter Mode:</span>
+                    <strong id="sidebar-active-mode" class="text-sky-400 font-mono font-bold">BATTERY</strong>
                 </div>
             </div>
 
-            <!-- AC Relay -->
-            <div class="card-dark p-5">
+            <!-- AC Distribution Load Circuit -->
+            <div class="card-dark p-4 md:p-5">
                 <div class="flex items-center gap-2 mb-3">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5" width="22" height="14" rx="7"/><circle cx="16" cy="12" r="3"/></svg>
-                    <h2 class="text-sm font-bold text-white tracking-wide">Main AC Distribution Bus</h2>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle cx="16" cy="12" r="3"/></svg>
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-300">Main Load Relay</h2>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="setLoad('ON')" class="py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30 rounded-lg text-xs font-bold transition">ENERGIZE AC</button>
-                    <button onclick="setLoad('OFF')" class="py-2 bg-rose-500/20 text-rose-400 border border-rose-500/50 hover:bg-rose-500/30 rounded-lg text-xs font-bold transition">DE-ENERGIZE</button>
+                    <button onclick="setLoad('ON')" class="py-2 bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/25 rounded-lg text-xs font-bold transition">ENERGIZE</button>
+                    <button onclick="setLoad('OFF')" class="py-2 bg-rose-500/15 text-rose-400 border border-rose-500/40 hover:bg-rose-500/25 rounded-lg text-xs font-bold transition">SHED LOAD</button>
                 </div>
-                <div class="mt-3 flex items-center justify-between text-xs">
-                    <span class="text-slate-400">Main Bus Status:</span>
-                    <span id="load-status-badge" class="font-bold text-emerald-400">ENERGIZED</span>
+                <div class="mt-3 flex items-center justify-between text-xs border-t border-slate-800/80 pt-2.5">
+                    <span class="text-slate-400">Load Relay Status:</span>
+                    <span id="sidebar-load-status" class="font-bold text-emerald-400">ENERGIZED</span>
+                </div>
+            </div>
+
+            <!-- Live Telemetry Mini Specs -->
+            <div class="card-dark p-4 space-y-3">
+                <div class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Target Telemetry Snapshot</div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="p-2.5 bg-[#0d1624] rounded-lg border border-slate-800">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold">Solar Bus</div>
+                        <div id="side-solar-v" class="font-mono text-amber-400 font-bold mt-0.5">10.20 V</div>
+                    </div>
+                    <div class="p-2.5 bg-[#0d1624] rounded-lg border border-slate-800">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold">Battery Bus</div>
+                        <div id="side-bat-v" class="font-mono text-emerald-400 font-bold mt-0.5">16.83 V</div>
+                    </div>
+                    <div class="p-2.5 bg-[#0d1624] rounded-lg border border-slate-800">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold">SoC Level</div>
+                        <div id="side-bat-soc" class="font-mono text-emerald-400 font-bold mt-0.5">87.5 %</div>
+                    </div>
+                    <div class="p-2.5 bg-[#0d1624] rounded-lg border border-slate-800">
+                        <div class="text-slate-500 text-[10px] uppercase font-bold">ACS712 Current</div>
+                        <div id="side-load-i" class="font-mono text-sky-400 font-bold mt-0.5">0.17 A</div>
+                    </div>
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN WORKSPACE -->
-        <main class="lg:col-span-3 space-y-6">
+        <!-- RIGHT WORKSPACE: TABS & TEST ENGINE -->
+        <main class="lg:col-span-3 space-y-5">
 
-            <!-- 4 KEY KPI CARDS -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="card-dark p-4 border-amber-500/30">
-                    <div class="flex justify-between items-center text-amber-400 mb-2">
-                        <span class="text-xs font-bold uppercase tracking-wider">Solar PV Array</span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
-                    </div>
-                    <div id="kpi-solar-v" class="text-2xl font-extrabold text-white">10.20 V</div>
-                    <div class="text-xs text-slate-400 mt-1">Harvest Yield: <strong id="kpi-solar-w" class="text-amber-400">2.4 W</strong></div>
-                </div>
-
-                <div class="card-dark p-4 border-emerald-500/30">
-                    <div class="flex justify-between items-center text-emerald-400 mb-2">
-                        <span class="text-xs font-bold uppercase tracking-wider">Battery BESS</span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="13" x2="23" y2="11"/><line x1="6" y1="10" x2="6" y2="14"/></svg>
-                    </div>
-                    <div id="kpi-bat-v" class="text-2xl font-extrabold text-white">16.83 V</div>
-                    <div class="text-xs text-slate-400 mt-1">State of Charge: <strong id="kpi-bat-soc" class="text-emerald-400">87.5% SoC</strong></div>
-                </div>
-
-                <div class="card-dark p-4 border-sky-500/30">
-                    <div class="flex justify-between items-center text-sky-400 mb-2">
-                        <span class="text-xs font-bold uppercase tracking-wider">Home Load</span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                    </div>
-                    <div id="kpi-load-p" class="text-2xl font-extrabold text-white">2.84 W</div>
-                    <div class="text-xs text-slate-400 mt-1">ACS712 Current: <strong id="kpi-load-i" class="text-sky-400">0.17 A</strong></div>
-                </div>
-
-                <div class="card-dark p-4 border-purple-500/30">
-                    <div class="flex justify-between items-center text-purple-400 mb-2">
-                        <span class="text-xs font-bold uppercase tracking-wider">Cell Health (SoH)</span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    </div>
-                    <div id="kpi-bat-soh" class="text-2xl font-extrabold text-white">98.5%</div>
-                    <div class="text-xs text-slate-400 mt-1">Remaining Life: <strong id="kpi-bat-rul" class="text-purple-400">1420 Cycles</strong></div>
-                </div>
-            </div>
-
-            <!-- TAB NAVIGATION (AUTOMATED TESTING MODULE FIRST) -->
-            <div class="border-b border-slate-800 flex gap-2 overflow-x-auto pb-1 text-xs md:text-sm font-semibold">
-                <button onclick="switchTab('tab-test')" id="btn-tab-test" class="tab-btn active px-4 py-2 rounded-t-lg transition flex items-center gap-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31L4.69 19.46A2 2 0 0 0 6.44 22h11.12a2 2 0 0 0 1.75-2.54L14 9.31V2"/></svg>
+            <!-- TAB SELECTION HEADER -->
+            <div class="flex gap-2 border-b border-slate-800 pb-0 overflow-x-auto text-xs md:text-sm font-semibold">
+                <button onclick="switchTab('tab-test')" id="btn-tab-test" class="tab-btn active px-4 py-2.5 rounded-t-lg flex items-center gap-2">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31L4.69 19.46A2 2 0 0 0 6.44 22h11.12a2 2 0 0 0 1.75-2.54L14 9.31V2"/></svg>
                     Automated Testing Module
                 </button>
-                <button onclick="switchTab('tab-topo')" id="btn-tab-topo" class="tab-btn text-slate-400 hover:text-white px-4 py-2 rounded-t-lg transition">Power Flow Topology</button>
-                <button onclick="switchTab('tab-forecast')" id="btn-tab-forecast" class="tab-btn text-slate-400 hover:text-white px-4 py-2 rounded-t-lg transition">24h AI Forecast</button>
-                <button onclick="switchTab('tab-demand')" id="btn-tab-demand" class="tab-btn text-slate-400 hover:text-white px-4 py-2 rounded-t-lg transition">Demand Matrix</button>
-                <button onclick="switchTab('tab-data')" id="btn-tab-data" class="tab-btn text-slate-400 hover:text-white px-4 py-2 rounded-t-lg transition">Telemetry Log</button>
+                <button onclick="switchTab('tab-topo')" id="btn-tab-topo" class="tab-btn px-4 py-2.5 rounded-t-lg flex items-center gap-2">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Digital Twin Architecture
+                </button>
+                <button onclick="switchTab('tab-forecast')" id="btn-tab-forecast" class="tab-btn px-4 py-2.5 rounded-t-lg flex items-center gap-2">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    24h AI Dispatch Forecast
+                </button>
+                <button onclick="switchTab('tab-data')" id="btn-tab-data" class="tab-btn px-4 py-2.5 rounded-t-lg flex items-center gap-2">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                    Telemetry Log
+                </button>
             </div>
 
-            <!-- TAB 1: AUTOMATED TESTING MODULE (MATCHING USER SCREENSHOT EXACTLY) -->
-                <!-- CSV TEST ENVIRONMENT SETUP SECTION -->
-                <div class="card-dark p-5 border border-purple-900/40 bg-gradient-to-r from-[#0d1624] to-[#141026]">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
-                        <div class="flex items-center gap-2.5">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            <div>
-                                <h3 class="text-sm font-extrabold text-white tracking-wide">Custom CSV Testing Environment Setup</h3>
-                                <p class="text-xs text-slate-400 mt-0.5">Upload a test specification CSV file to dynamically instantiate scenarios, tolerance margins, and expected benchmarks.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 self-start md:self-auto">
-                            <span id="active-suite-badge" class="px-3 py-1 rounded text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30">
-                                Active: Built-in Benchmark (8 Cases)
-                            </span>
-                            <button id="reset-suite-btn" onclick="resetToBuiltinSuite()" class="hidden px-2.5 py-1 text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition">
-                                Reset
-                            </button>
-                        </div>
-                    </div>
+            <!-- ======================================================== -->
+            <!-- TAB 1: AUTOMATED TESTING MODULE (MATCHING USER SCREENSHOT) -->
+            <!-- ======================================================== -->
+            <div id="tab-test" class="tab-content space-y-5">
 
-                    <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800">
-                        <button onclick="downloadDemoCSV()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-sky-400 border border-slate-700 font-bold text-xs rounded-lg flex items-center gap-2 transition">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            Download Demo CSV Template
-                        </button>
-                        <label class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg flex items-center gap-2 cursor-pointer shadow-lg shadow-purple-900/30 transition">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            <span>Upload Test Suite CSV</span>
-                            <input type="file" id="custom-csv-input" accept=".csv" class="hidden" onchange="handleCsvUpload(event)">
-                        </label>
-                        <span id="csv-upload-status" class="text-xs text-slate-400 font-medium">Ready: Upload .csv to initialize environment</span>
-                    </div>
-                </div>
-            <div id="tab-test" class="tab-content space-y-6">
-                <!-- THE TESTING MODULE CONTAINER -->
-                <div class="test-card p-6 shadow-2xl">
+                <!-- MAIN CARD (EXACT MATCH TO REFERENCE) -->
+                <div class="test-card p-5 md:p-6">
                     <!-- Title Bar -->
                     <div class="flex justify-between items-center mb-5">
                         <div class="flex items-center gap-3">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31L4.69 19.46A2 2 0 0 0 6.44 22h11.12a2 2 0 0 0 1.75-2.54L14 9.31V2"/><line x1="8.5" y1="2" x2="15.5" y2="2"/></svg>
-                            <h2 class="text-base font-extrabold text-white tracking-wider uppercase">
+                            <h2 class="text-base font-black text-white tracking-wider uppercase">
                                 AUTOMATED TESTING MODULE
                             </h2>
                         </div>
-                        <div>
+                        <div class="flex items-center gap-2">
+                            <span id="suite-type-pill" class="bg-purple-500/10 border border-purple-500/40 text-purple-300 px-2.5 py-1 rounded text-[11px] font-bold tracking-wider uppercase hidden">
+                                CUSTOM CSV
+                            </span>
                             <span id="badge-demo-status" class="bg-amber-500/10 border border-amber-500/50 text-amber-400 px-3 py-1 rounded text-[11px] font-extrabold tracking-wider uppercase">
                                 DEMO DATA
                             </span>
                         </div>
                     </div>
 
-                                        <!-- Fault Injection & Execution Toolbar (Exact to Reference UI) -->
+                    <!-- Fault Injection & Execution Toolbar (Exact to Reference UI) -->
                     <div class="flex flex-wrap items-center justify-between gap-3 bg-[#0d1624] border border-slate-800 p-3.5 rounded-xl mb-4">
                         <label class="flex items-center gap-2.5 text-xs md:text-sm font-semibold text-slate-300 cursor-pointer select-none">
                             <input type="checkbox" id="sim-link-fail-cb" onchange="toggleLinkFailure(this.checked)" class="w-4 h-4 accent-sky-500 rounded border-slate-700">
@@ -265,7 +258,13 @@
                         </div>
                     </div>
 
-                    <!-- Dropdown -->
+                    <!-- Fault Injection Active Notification -->
+                    <div id="link-fail-banner" class="hidden mb-4 p-3 bg-rose-500/10 border border-rose-500/40 rounded-xl flex items-center gap-3 text-xs text-rose-300">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span><strong>FAULT INJECTION ACTIVE:</strong> Communication link failure simulated. Packet loss forced to 100%. Timeout handling engaged.</span>
+                    </div>
+
+                    <!-- Scenario Selector Dropdown -->
                     <div class="mb-4">
                         <select id="academic-test-select" onchange="onSelectTest()" class="w-full bg-[#0d1624] border border-slate-700/80 rounded-lg p-3 text-xs md:text-sm text-white font-semibold focus:outline-none focus:border-sky-500 transition">
                             <option value="TC-01">TC-01 — Sensor reading validation (Temperature)</option>
@@ -279,7 +278,7 @@
                         </select>
                     </div>
 
-                    <!-- Action Buttons -->
+                    <!-- Action Buttons: Run Individual & Run All Tests -->
                     <div class="flex flex-wrap gap-3 mb-5">
                         <button onclick="runIndividual()" class="px-5 py-2.5 bg-slate-900 border border-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-bold flex items-center gap-2 transition">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -334,21 +333,54 @@
                     </div>
                 </div>
 
-                <!-- ACADEMIC TEST VERIFICATION SUMMARY & EXPORT -->
+                <!-- SLEEK CUSTOM CSV TEST ENVIRONMENT SETUP DRAWER -->
+                <div class="card-dark p-4 md:p-5 border-slate-800">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                        <div class="flex items-center gap-2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-200">Custom CSV Test Environment Setup</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="active-suite-badge" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30">
+                                Suite: Built-in Benchmark (8 Cases)
+                            </span>
+                            <button id="reset-suite-btn" onclick="resetToBuiltinSuite()" class="hidden px-2.5 py-0.5 text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-3">
+                        Upload an academic test specification CSV file to dynamically instantiate custom test scenarios, tolerance bounds, and evaluation parameters.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button onclick="downloadDemoCSV()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-sky-400 border border-slate-700 font-bold text-xs rounded-lg flex items-center gap-2 transition">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Download Demo CSV Template
+                        </button>
+                        <label class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg flex items-center gap-2 cursor-pointer shadow-lg shadow-purple-900/30 transition">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span>Upload Test Suite CSV</span>
+                            <input type="file" id="custom-csv-input" accept=".csv" class="hidden" onchange="handleCsvUpload(event)">
+                        </label>
+                        <span id="csv-upload-status" class="text-xs text-slate-400 font-medium">Ready: Upload .csv to initialize custom test vectors</span>
+                    </div>
+                </div>
+
+                <!-- ACADEMIC TEST VERIFICATION SUMMARY & REPORT EXPORT -->
                 <div class="card-dark p-5">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                         <div>
                             <h3 class="text-sm font-bold text-white">Academic Software Testing Specification & Verification Report</h3>
                             <p class="text-xs text-slate-400 mt-0.5">Automated test matrix for academic presentation, evaluation, and documentation viva.</p>
                         </div>
-                        <button onclick="exportAcademicCSV()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs rounded-lg font-bold flex items-center gap-2 self-start md:self-auto">
+                        <button onclick="exportAcademicCSV()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs rounded-lg font-bold flex items-center gap-2 self-start md:self-auto transition">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             Export Test Report (CSV)
                         </button>
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
-                        <div class="p-3 bg-slate-800/50 rounded-lg">
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
                             <div class="text-[11px] text-slate-400 uppercase font-semibold">Total Tests</div>
                             <div id="sum-total" class="text-xl font-bold text-white mt-1">8</div>
                         </div>
@@ -360,11 +392,11 @@
                             <div class="text-[11px] text-rose-400 uppercase font-semibold">Failed</div>
                             <div id="sum-failed" class="text-xl font-bold text-rose-400 mt-1">3</div>
                         </div>
-                        <div class="p-3 bg-slate-800/50 rounded-lg">
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
                             <div class="text-[11px] text-slate-400 uppercase font-semibold">Pass Rate</div>
                             <div id="sum-rate" class="text-xl font-bold text-sky-400 mt-1">62.5%</div>
                         </div>
-                        <div class="p-3 bg-slate-800/50 rounded-lg">
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
                             <div class="text-[11px] text-slate-400 uppercase font-semibold">Mean Latency</div>
                             <div id="sum-latency" class="text-xl font-bold text-slate-200 mt-1">146 ms</div>
                         </div>
@@ -372,48 +404,105 @@
                 </div>
             </div>
 
-            <!-- TAB 2: POWER FLOW TOPOLOGY -->
-            <div id="tab-topo" class="tab-content hidden space-y-6">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="card-node p-4 border-t-4 border-amber-500">
-                        <div class="text-xs text-amber-400 font-bold uppercase">Solar PV Array</div>
-                        <div id="node-solar-v" class="text-lg font-bold text-white mt-1">10.20 V</div>
-                        <div class="text-xs text-slate-400">DC Yield: <span id="node-solar-w">2.4 W</span></div>
-                        <div class="mt-2 text-[10px] bg-amber-500/20 text-amber-300 py-0.5 px-2 rounded inline-block">DC Generation</div>
+            <!-- ======================================================== -->
+            <!-- TAB 2: DIGITAL TWIN ARCHITECTURE (HIGH-TECH SCADA VIEW)  -->
+            <!-- ======================================================== -->
+            <div id="tab-topo" class="tab-content hidden space-y-5">
+                <!-- 4 Node Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                    <div class="card-node p-4 border-t-2 border-amber-400">
+                        <div class="text-[11px] text-amber-400 font-extrabold uppercase tracking-wider">Rooftop Solar PV</div>
+                        <div id="node-solar-v" class="text-xl font-black text-white mt-1">10.20 V</div>
+                        <div class="text-xs text-slate-400 mt-0.5">DC Yield: <strong id="node-solar-w" class="text-amber-400">2.4 W</strong></div>
+                        <div class="mt-2 text-[10px] bg-amber-500/10 text-amber-300 py-0.5 px-2 rounded font-semibold inline-block">DC Power Flow Active</div>
                     </div>
-                    <div class="card-node p-4 border-t-4 border-emerald-500">
-                        <div class="text-xs text-emerald-400 font-bold uppercase">Hybrid Inverter</div>
-                        <div class="text-lg font-bold text-white mt-1">ESP32 Core</div>
-                        <div class="text-xs text-slate-400">Efficiency: 96.4%</div>
-                        <div id="node-inv-mode" class="mt-2 text-[10px] bg-emerald-500/20 text-emerald-300 py-0.5 px-2 rounded inline-block">Mode: BATTERY</div>
+                    <div class="card-node p-4 border-t-2 border-emerald-400">
+                        <div class="text-[11px] text-emerald-400 font-extrabold uppercase tracking-wider">Hybrid Inverter</div>
+                        <div class="text-xl font-black text-white mt-1">ESP32 Core</div>
+                        <div class="text-xs text-slate-400 mt-0.5">Efficiency: <strong class="text-emerald-400">96.4%</strong></div>
+                        <div id="node-inv-mode" class="mt-2 text-[10px] bg-emerald-500/10 text-emerald-300 py-0.5 px-2 rounded font-semibold inline-block">Mode: BATTERY</div>
                     </div>
-                    <div class="card-node p-4 border-t-4 border-sky-500">
-                        <div class="text-xs text-sky-400 font-bold uppercase">Battery (BESS)</div>
-                        <div id="node-bat-v" class="text-lg font-bold text-white mt-1">16.83 V</div>
-                        <div class="text-xs text-slate-400">SoC: <span id="node-bat-soc">87.5%</span></div>
-                        <div class="mt-2 text-[10px] bg-sky-500/20 text-sky-300 py-0.5 px-2 rounded inline-block">Temp: 28.0 deg C</div>
+                    <div class="card-node p-4 border-t-2 border-sky-400">
+                        <div class="text-[11px] text-sky-400 font-extrabold uppercase tracking-wider">Battery BESS</div>
+                        <div id="node-bat-v" class="text-xl font-black text-white mt-1">16.83 V</div>
+                        <div class="text-xs text-slate-400 mt-0.5">SoC: <strong id="node-bat-soc" class="text-sky-400">87.5%</strong></div>
+                        <div class="mt-2 text-[10px] bg-sky-500/10 text-sky-300 py-0.5 px-2 rounded font-semibold inline-block">Temp: 28.0 &deg;C</div>
                     </div>
-                    <div class="card-node p-4 border-t-4 border-purple-500">
-                        <div class="text-xs text-purple-400 font-bold uppercase">AC Distribution</div>
-                        <div id="node-load-p" class="text-lg font-bold text-white mt-1">2.84 W</div>
-                        <div class="text-xs text-slate-400">Current: <span id="node-load-i">0.17 A</span></div>
-                        <div id="node-load-status" class="mt-2 text-[10px] bg-purple-500/20 text-purple-300 py-0.5 px-2 rounded inline-block">Status: ON</div>
+                    <div class="card-node p-4 border-t-2 border-purple-400">
+                        <div class="text-[11px] text-purple-400 font-extrabold uppercase tracking-wider">AC Load Panel</div>
+                        <div id="node-load-p" class="text-xl font-black text-white mt-1">2.84 W</div>
+                        <div class="text-xs text-slate-400 mt-0.5">Current: <strong id="node-load-i" class="text-purple-400">0.17 A</strong></div>
+                        <div id="node-load-status" class="mt-2 text-[10px] bg-purple-500/10 text-purple-300 py-0.5 px-2 rounded font-semibold inline-block">Circuit: ENERGIZED</div>
                     </div>
                 </div>
 
-                <div class="card-dark p-5">
-                    <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-                        Real-Time Power Routing Matrix (Sankey Balance)
-                    </h3>
-                    <div id="sankey-chart" style="height: 320px;"></div>
+                <!-- High-Tech SCADA Architecture Diagram (Replaces ugly Sankey) -->
+                <div class="card-dark p-6">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                        <div class="flex items-center gap-2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                            <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">Single-Line SCADA Microgrid Power Flow</h3>
+                        </div>
+                        <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded">
+                            Balanced Power Flow: 0.0 W Delta
+                        </span>
+                    </div>
+
+                    <!-- Clean Industrial Schematic SVG -->
+                    <div class="w-full overflow-x-auto py-4">
+                        <svg viewBox="0 0 900 240" class="w-full max-w-4xl mx-auto text-xs" style="min-width: 650px;">
+                            <defs>
+                                <linearGradient id="solarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/>
+                                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.3"/>
+                                </linearGradient>
+                                <linearGradient id="batGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+                                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.3"/>
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Buses -->
+                            <line x1="180" y1="70" x2="380" y2="70" stroke="#f59e0b" stroke-width="3" stroke-dasharray="6,4"/>
+                            <line x1="180" y1="170" x2="380" y2="170" stroke="#10b981" stroke-width="3" stroke-dasharray="6,4"/>
+                            <line x1="520" y1="120" x2="720" y2="120" stroke="#38bdf8" stroke-width="3"/>
+
+                            <!-- Node 1: Solar -->
+                            <rect x="30" y="35" width="150" height="70" rx="8" fill="#0d1624" stroke="#f59e0b" stroke-width="1.5"/>
+                            <text x="45" y="60" fill="#f59e0b" font-weight="bold" font-size="12">SOLAR PV ARRAY</text>
+                            <text x="45" y="80" fill="#ffffff" font-weight="800" font-size="14">10.20 V | 2.4 W</text>
+                            <text x="45" y="95" fill="#94a3b8" font-size="10">DC Voltage Bus</text>
+
+                            <!-- Node 2: Battery BESS -->
+                            <rect x="30" y="135" width="150" height="70" rx="8" fill="#0d1624" stroke="#10b981" stroke-width="1.5"/>
+                            <text x="45" y="160" fill="#10b981" font-weight="bold" font-size="12">BATTERY STORAGE</text>
+                            <text x="45" y="180" fill="#ffffff" font-weight="800" font-size="14">16.83 V | 87.5%</text>
+                            <text x="45" y="195" fill="#94a3b8" font-size="10">State of Health: 98.5%</text>
+
+                            <!-- Central Node: Hybrid Inverter Gateway -->
+                            <rect x="380" y="55" width="140" height="130" rx="10" fill="#0f1c2d" stroke="#38bdf8" stroke-width="2"/>
+                            <text x="395" y="85" fill="#38bdf8" font-weight="bold" font-size="12">HYBRID INVERTER</text>
+                            <text x="395" y="105" fill="#ffffff" font-weight="800" font-size="14">ESP32 Core</text>
+                            <text x="395" y="125" fill="#94a3b8" font-size="10">Efficiency: 96.4%</text>
+                            <text x="395" y="150" fill="#10b981" font-weight="bold" font-size="11">MODE: BATTERY</text>
+                            <text x="395" y="168" fill="#64748b" font-size="10">MPPT Active</text>
+
+                            <!-- Node 3: AC Loads -->
+                            <rect x="720" y="85" width="150" height="70" rx="8" fill="#0d1624" stroke="#a855f7" stroke-width="1.5"/>
+                            <text x="735" y="110" fill="#a855f7" font-weight="bold" font-size="12">AC DISTRIBUTION</text>
+                            <text x="735" y="130" fill="#ffffff" font-weight="800" font-size="14">2.84 W | 0.17 A</text>
+                            <text x="735" y="145" fill="#10b981" font-size="10">STATUS: ENERGIZED</text>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
-            <!-- TAB 3: 24-HOUR AI FORECAST -->
-            <div id="tab-forecast" class="tab-content hidden space-y-6">
+            <!-- ======================================================== -->
+            <!-- TAB 3: 24-HOUR AI PREDICTIVE FORECAST                     -->
+            <!-- ======================================================== -->
+            <div id="tab-forecast" class="tab-content hidden space-y-5">
                 <div class="card-dark p-5">
-                    <h3 class="text-sm font-bold text-slate-200 mb-2 flex items-center gap-2">
+                    <h3 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/></svg>
                         24-Hour Diurnal AI Dispatch & Solar Irradiance Forecast
                     </h3>
@@ -421,70 +510,15 @@
                 </div>
             </div>
 
-            <!-- TAB 4: DEMAND MATRIX -->
-            <div id="tab-demand" class="tab-content hidden space-y-6">
+            <!-- ======================================================== -->
+            <!-- TAB 4: TELEMETRY LOG                                      -->
+            <!-- ======================================================== -->
+            <div id="tab-data" class="tab-content hidden space-y-5">
                 <div class="card-dark p-5">
-                    <h3 class="text-sm font-bold text-slate-200 mb-3">Household Load Prioritization & Demand Response Matrix</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-800 text-slate-400 uppercase font-semibold">
-                                <tr>
-                                    <th class="p-3">Circuit Identifier</th>
-                                    <th class="p-3">Power Rating</th>
-                                    <th class="p-3">Priority Tier</th>
-                                    <th class="p-3">Optimization Rule</th>
-                                    <th class="p-3">Live Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800 text-slate-300">
-                                <tr>
-                                    <td class="p-3 font-medium text-white">Circuit 1: Refrigerator & Cold Storage</td>
-                                    <td class="p-3">120 W</td>
-                                    <td class="p-3"><span class="bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded">Tier 1: Critical</span></td>
-                                    <td class="p-3">Always ON - Protected from Load Shedding</td>
-                                    <td class="p-3 text-emerald-400 font-bold">ENERGIZED</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-medium text-white">Circuit 2: Lighting & Smart Gateway</td>
-                                    <td class="p-3">35 W</td>
-                                    <td class="p-3"><span class="bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded">Tier 1: Critical</span></td>
-                                    <td class="p-3">Essential Infrastructure</td>
-                                    <td class="p-3 text-emerald-400 font-bold">ENERGIZED</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-medium text-white">Circuit 3: HVAC / Smart Cooling</td>
-                                    <td class="p-3">250 W</td>
-                                    <td class="p-3"><span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">Tier 2: Deferrable</span></td>
-                                    <td class="p-3">Modulated when Battery SoC < 30%</td>
-                                    <td class="p-3 text-amber-400 font-bold">MODULATING</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-medium text-white">Circuit 4: Washing Machine / Laundry</td>
-                                    <td class="p-3">300 W</td>
-                                    <td class="p-3"><span class="bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded">Tier 3: Flexible</span></td>
-                                    <td class="p-3">Auto-scheduled during Solar Peak (11am-2pm)</td>
-                                    <td class="p-3 text-slate-400">STANDBY</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-medium text-white">Circuit 5: EV Charging Buffer</td>
-                                    <td class="p-3">500 W</td>
-                                    <td class="p-3"><span class="bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded">Tier 3: Flexible</span></td>
-                                    <td class="p-3">Active only when Solar Surplus > 400W</td>
-                                    <td class="p-3 text-slate-500">IDLE</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 5: TELEMETRY LOG -->
-            <div id="tab-data" class="tab-content hidden space-y-6">
-                <div class="card-dark p-5">
-                    <h3 class="text-sm font-bold text-slate-200 mb-4">Historical Microgrid Telemetry Frames</h3>
+                    <h3 class="text-sm font-bold text-white mb-4">Historical Microgrid Telemetry Frames</h3>
                     <div class="overflow-x-auto max-h-96">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-800 text-slate-400 sticky top-0 uppercase font-semibold">
+                        <table class="w-full text-left text-xs font-mono">
+                            <thead class="bg-slate-900 text-slate-400 sticky top-0 uppercase font-semibold border-b border-slate-800">
                                 <tr>
                                     <th class="p-2.5">ID</th>
                                     <th class="p-2.5">Timestamp</th>
@@ -496,7 +530,7 @@
                                     <th class="p-2.5">Safety Verdict</th>
                                 </tr>
                             </thead>
-                            <tbody id="telemetry-table-body" class="divide-y divide-slate-800 text-slate-300">
+                            <tbody id="telemetry-table-body" class="divide-y divide-slate-800/80 text-slate-300">
                                 <tr><td colspan="8" class="p-4 text-center text-slate-500">Loading telemetry records...</td></tr>
                             </tbody>
                         </table>
@@ -507,7 +541,7 @@
         </main>
     </div>
 
-    <!-- JAVASCRIPT: TEST ENGINE & LIVE SYNC -->
+    <!-- JAVASCRIPT: TEST ENGINE, CSV PARSER & LIVE SYNC -->
     <script>
         const API_BASE = window.location.origin.includes('vercel.app') 
             ? window.location.origin + '/api'
@@ -615,8 +649,9 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
                     const selectEl = document.getElementById('academic-test-select');
                     selectEl.innerHTML = academicTests.map(t => `<option value="${t.id}">${t.id} &mdash; ${t.name}</option>`).join('');
 
-                    document.getElementById('active-suite-badge').textContent = `Active: Custom CSV Suite (${academicTests.length} Cases)`;
-                    document.getElementById('active-suite-badge').className = "px-3 py-1 rounded text-[11px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40";
+                    document.getElementById('suite-type-pill').classList.remove('hidden');
+                    document.getElementById('active-suite-badge').textContent = `Suite: Custom CSV (${academicTests.length} Cases)`;
+                    document.getElementById('active-suite-badge').className = "px-2.5 py-0.5 rounded text-[11px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40";
                     document.getElementById('reset-suite-btn').classList.remove('hidden');
                     document.getElementById('csv-upload-status').textContent = `Loaded ${academicTests.length} test cases from '${file.name}'`;
                     document.getElementById('csv-upload-status').className = "text-xs text-emerald-400 font-semibold";
@@ -636,17 +671,26 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
             const selectEl = document.getElementById('academic-test-select');
             selectEl.innerHTML = academicTests.map(t => `<option value="${t.id}">${t.id} &mdash; ${t.name}</option>`).join('');
 
-            document.getElementById('active-suite-badge').textContent = "Active: Built-in Benchmark (8 Cases)";
-            document.getElementById('active-suite-badge').className = "px-3 py-1 rounded text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30";
+            document.getElementById('suite-type-pill').classList.add('hidden');
+            document.getElementById('active-suite-badge').textContent = "Suite: Built-in Benchmark (8 Cases)";
+            document.getElementById('active-suite-badge').className = "px-2.5 py-0.5 rounded text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30";
             document.getElementById('reset-suite-btn').classList.add('hidden');
-            document.getElementById('csv-upload-status').textContent = "Ready: Upload .csv to initialize environment";
+            document.getElementById('csv-upload-status').textContent = "Ready: Upload .csv to initialize custom test vectors";
             document.getElementById('csv-upload-status').className = "text-xs text-slate-400 font-medium";
 
             renderTestingModule();
         }
+
         let isLinkFailureActive = false;
         function toggleLinkFailure(failed) {
             isLinkFailureActive = failed;
+            const banner = document.getElementById('link-fail-banner');
+            if (failed) {
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+
             academicTests.forEach(t => {
                 if (failed && (t.id === 'TC-02' || t.id === 'TC-03' || t.id === 'TC-06')) {
                     if (t.id === 'TC-02') {
@@ -696,16 +740,16 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
                 : "bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 px-3 py-1 rounded text-[11px] font-extrabold tracking-wider uppercase";
 
             document.getElementById('btn-env-demo').className = demo 
-                ? "w-full py-2 px-3 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-lg text-xs font-bold text-left flex justify-between items-center"
-                : "w-full py-2 px-3 bg-slate-800 text-slate-400 border border-slate-700 hover:text-white rounded-lg text-xs font-bold text-left flex justify-between items-center";
+                ? "w-full py-2.5 px-3 bg-amber-500/15 text-amber-400 border border-amber-500/50 rounded-lg text-xs font-bold text-left flex justify-between items-center transition"
+                : "w-full py-2.5 px-3 bg-slate-900 text-slate-400 border border-slate-800 hover:text-white rounded-lg text-xs font-bold text-left flex justify-between items-center transition";
             
             document.getElementById('btn-env-live').className = !demo 
-                ? "w-full py-2 px-3 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-lg text-xs font-bold text-left flex justify-between items-center"
-                : "w-full py-2 px-3 bg-slate-800 text-slate-400 border border-slate-700 hover:text-white rounded-lg text-xs font-bold text-left flex justify-between items-center";
+                ? "w-full py-2.5 px-3 bg-emerald-500/15 text-emerald-400 border border-emerald-500/50 rounded-lg text-xs font-bold text-left flex justify-between items-center transition"
+                : "w-full py-2.5 px-3 bg-slate-900 text-slate-400 border border-slate-800 hover:text-white rounded-lg text-xs font-bold text-left flex justify-between items-center transition";
 
             document.getElementById('env-desc').textContent = demo 
-                ? "Demo Mode: Uses calibrated academic failure benchmarks (TC-01, TC-02, TC-03) for viva demonstration."
-                : "Live Mode: Real-time telemetry assertions evaluating live hardware parameters.";
+                ? "Demo Mode Active: Injects calibrated sensor drift (TC-01) and communication drop (TC-02) for examiner evaluation viva."
+                : "Live Mode Active: Real-time telemetry assertions directly evaluate live ESP32 sensors.";
 
             renderTestingModule();
         }
@@ -718,13 +762,13 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
         function runIndividual() {
             const t = academicTests.find(x => x.id === selectedTestId);
             if (!t) return;
-            t.duration_ms = Math.floor(Math.random() * 40) + (t.passed ? 50 : 200);
+            t.duration_ms = Math.floor(Math.random() * 40) + (t.passed ? 45 : 210);
             renderTestingModule();
         }
 
         function runAllTests() {
             academicTests.forEach(t => {
-                t.duration_ms = Math.floor(Math.random() * 40) + (t.passed ? 50 : 200);
+                t.duration_ms = Math.floor(Math.random() * 40) + (t.passed ? 45 : 210);
             });
             renderTestingModule();
         }
@@ -732,10 +776,10 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
         function renderTestingModule() {
             const current = academicTests.find(x => x.id === selectedTestId) || academicTests[0];
 
-            document.getElementById('m-expected').textContent = `${current.expected} ${current.unit}`;
-            document.getElementById('m-actual').textContent = `${current.actual} ${current.unit}`;
-            document.getElementById('m-tolerance').textContent = `&plusmn;${current.tolerance} ${current.unit}`;
-            document.getElementById('m-error').textContent = `${current.error} ${current.unit}`;
+            document.getElementById('m-expected').innerHTML = `${current.expected} ${current.unit}`;
+            document.getElementById('m-actual').innerHTML = `${current.actual} ${current.unit}`;
+            document.getElementById('m-tolerance').innerHTML = `&plusmn;${current.tolerance} ${current.unit}`;
+            document.getElementById('m-error').innerHTML = `${current.error} ${current.unit}`;
             document.getElementById('m-duration').textContent = `${current.duration_ms} ms`;
 
             const statusPill = document.getElementById('m-status-pill');
@@ -745,12 +789,12 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
                 statusPill.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
                 statusPill.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Pass';
                 reasonEl.className = "mt-4 text-xs font-semibold text-emerald-400";
-                reasonEl.textContent = `Reason: Error ${current.error} ${current.unit} is within tolerance &plusmn;${current.tolerance} ${current.unit}`;
+                reasonEl.innerHTML = `Reason: Error ${current.error} ${current.unit} is within tolerance &plusmn;${current.tolerance} ${current.unit}`;
             } else {
                 statusPill.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40";
                 statusPill.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> Fail';
                 reasonEl.className = "mt-4 text-xs font-semibold text-rose-400";
-                reasonEl.textContent = `Reason: Error ${current.error} ${current.unit} exceeds tolerance &plusmn;${current.tolerance} ${current.unit}`;
+                reasonEl.innerHTML = `Reason: Error ${current.error} ${current.unit} exceeds tolerance &plusmn;${current.tolerance} ${current.unit}`;
             }
 
             // Render List Items
@@ -800,14 +844,13 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
                 t.error,
                 t.duration_ms,
                 t.status,
-                `"${t.reason}"`
-            ].join(','));
+                `"${t.reason.replace(/&deg;/g, 'deg ').replace(/&plusmn;/g, '+/-')}"`
+            ]);
 
-            const csvContent = headers.join(',') + '\n' + rows.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+            const encodedUri = encodeURI(csvContent);
             const a = document.createElement('a');
-            a.href = url;
+            a.href = encodedUri;
             a.download = `academic_software_test_report_${Date.now()}.csv`;
             a.click();
         }
@@ -824,7 +867,6 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
             activeBtn.classList.add('active');
             activeBtn.classList.remove('text-slate-400');
 
-            if (tabId === 'tab-topo') renderSankey();
             if (tabId === 'tab-forecast') renderForecast();
         }
 
@@ -836,6 +878,8 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ mode: mode })
                 });
+                document.getElementById('sidebar-active-mode').textContent = mode;
+                document.getElementById('node-inv-mode').textContent = `Mode: ${mode}`;
                 fetchLatestTelemetry();
             } catch (err) {
                 console.error("Mode switch error:", err);
@@ -849,6 +893,9 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ load_status: status })
                 });
+                document.getElementById('sidebar-load-status').textContent = status === 'ON' ? 'ENERGIZED' : 'SHED';
+                document.getElementById('sidebar-load-status').className = status === 'ON' ? 'font-bold text-emerald-400' : 'font-bold text-rose-400';
+                document.getElementById('node-load-status').textContent = `Circuit: ${status === 'ON' ? 'ENERGIZED' : 'SHED'}`;
                 fetchLatestTelemetry();
             } catch (err) {
                 console.error("Load switch error:", err);
@@ -864,78 +911,46 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
                 ]);
 
                 if (telRes.ok) {
-                    const data = await telRes.json();
-                    if (data && data.solar_voltage !== undefined) {
-                        updateUI(data);
+                    const t = await telRes.json();
+                    updateTelemetryUI(t);
+                }
+                if (ctrlRes.ok) {
+                    const c = await ctrlRes.json();
+                    if (c.mode) {
+                        document.getElementById('sidebar-active-mode').textContent = c.mode;
+                        document.getElementById('node-inv-mode').textContent = `Mode: ${c.mode}`;
+                    }
+                    if (c.load_status) {
+                        document.getElementById('sidebar-load-status').textContent = c.load_status === 'ON' ? 'ENERGIZED' : 'SHED';
+                        document.getElementById('sidebar-load-status').className = c.load_status === 'ON' ? 'font-bold text-emerald-400' : 'font-bold text-rose-400';
+                        document.getElementById('node-load-status').textContent = `Circuit: ${c.load_status === 'ON' ? 'ENERGIZED' : 'SHED'}`;
                     }
                 }
-
-                if (ctrlRes.ok) {
-                    const ctrl = await ctrlRes.json();
-                    document.getElementById('load-status-badge').textContent = ctrl.load_status === 'ON' ? 'ENERGIZED' : 'DE-ENERGIZED';
-                    document.getElementById('load-status-badge').className = ctrl.load_status === 'ON' ? 'font-bold text-emerald-400' : 'font-bold text-rose-400';
-                    document.getElementById('node-inv-mode').textContent = `Mode: ${ctrl.mode}`;
-                }
             } catch (err) {
-                console.warn("Telemetry fetch error:", err);
+                // Silently fallback to offline display
             }
         }
 
-        function updateUI(t) {
-            const solarV = Number(t.solar_voltage || 10.2).toFixed(2);
-            const batV = Number(t.battery_voltage || 16.8).toFixed(2);
+        function updateTelemetryUI(t) {
+            const solarV = Number(t.solar_voltage || 10.20).toFixed(2);
+            const batV = Number(t.battery_voltage || 16.83).toFixed(2);
             const batSoC = Number(t.battery_level || 87.5).toFixed(1);
             const loadP = Number(t.load_power || 2.84).toFixed(2);
             const loadI = Number(t.load_current || 0.17).toFixed(2);
-            const batSoH = Number(t.battery_soh || 98.5).toFixed(1);
-            const batRul = t.battery_rul_cycles || 1420;
             const solarW = Math.max(0, (solarV - 8.5) * 0.45 * 10).toFixed(1);
 
-            document.getElementById('kpi-solar-v').textContent = `${solarV} V`;
-            document.getElementById('kpi-solar-w').textContent = `${solarW} W`;
+            document.getElementById('side-solar-v').textContent = `${solarV} V`;
             document.getElementById('node-solar-v').textContent = `${solarV} V`;
             document.getElementById('node-solar-w').textContent = `${solarW} W`;
 
-            document.getElementById('kpi-bat-v').textContent = `${batV} V`;
-            document.getElementById('kpi-bat-soc').textContent = `${batSoC}% SoC`;
+            document.getElementById('side-bat-v').textContent = `${batV} V`;
+            document.getElementById('side-bat-soc').textContent = `${batSoC} %`;
             document.getElementById('node-bat-v').textContent = `${batV} V`;
             document.getElementById('node-bat-soc').textContent = `${batSoC}%`;
 
-            document.getElementById('kpi-load-p').textContent = `${loadP} W`;
-            document.getElementById('kpi-load-i').textContent = `${loadI} A`;
+            document.getElementById('side-load-i').textContent = `${loadI} A`;
             document.getElementById('node-load-p').textContent = `${loadP} W`;
             document.getElementById('node-load-i').textContent = `${loadI} A`;
-
-            document.getElementById('kpi-bat-soh').textContent = `${batSoH}%`;
-            document.getElementById('kpi-bat-rul').textContent = `${batRul} Cycles`;
-        }
-
-        function renderSankey() {
-            const data = [{
-                type: "sankey",
-                orientation: "h",
-                node: {
-                    pad: 15,
-                    thickness: 20,
-                    line: { color: "#0f172a", width: 0.5 },
-                    label: ["Solar PV Array", "Battery BESS", "Utility Grid", "Hybrid Inverter", "Critical Loads (Tier 1)", "Flexible Loads (Tier 2/3)"],
-                    color: ["#f59e0b", "#10b981", "#64748b", "#38bdf8", "#ec4899", "#8b5cf6"]
-                },
-                link: {
-                    source: [0, 1, 2, 3, 3],
-                    target: [3, 3, 3, 4, 5],
-                    value: [2.4, 2.0, 0.1, 1.8, 1.2],
-                    color: ["rgba(245, 158, 11, 0.4)", "rgba(16, 185, 129, 0.4)", "rgba(100, 116, 139, 0.3)", "rgba(56, 189, 248, 0.4)", "rgba(139, 92, 246, 0.4)"]
-                }
-            }];
-
-            const layout = {
-                paper_bgcolor: "#09111c",
-                font: { color: "#e2e8f0", size: 11 },
-                margin: { l: 10, r: 10, t: 10, b: 10 }
-            };
-
-            Plotly.newPlot('sankey-chart', data, layout, {responsive: true, displayModeBar: false});
         }
 
         function renderForecast() {
@@ -946,29 +961,29 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
             const traceSolar = {
                 x: hours,
                 y: solarGen,
-                name: 'Solar PV Generation',
+                name: 'Solar PV Harvest (W)',
                 type: 'scatter',
                 mode: 'lines',
-                line: { color: '#f59e0b', width: 3, shape: 'spline' },
+                line: { color: '#f59e0b', width: 2.5, shape: 'spline' },
                 fill: 'tozeroy',
-                fillcolor: 'rgba(245, 158, 11, 0.15)'
+                fillcolor: 'rgba(245, 158, 11, 0.12)'
             };
 
             const traceLoad = {
                 x: hours,
                 y: loadDemand,
-                name: 'Household Load Demand',
+                name: 'Load Demand (W)',
                 type: 'scatter',
                 mode: 'lines',
-                line: { color: '#38bdf8', width: 3, shape: 'spline' }
+                line: { color: '#38bdf8', width: 2.5, shape: 'spline' }
             };
 
             const layout = {
-                paper_bgcolor: "#09111c",
-                plot_bgcolor: "#09111c",
-                font: { color: "#e2e8f0" },
-                margin: { l: 40, r: 20, t: 30, b: 40 },
-                legend: { orientation: 'h', y: 1.1 },
+                paper_bgcolor: "#0b1320",
+                plot_bgcolor: "#0b1320",
+                font: { color: "#94a3b8", size: 11 },
+                margin: { l: 40, r: 20, t: 20, b: 40 },
+                legend: { orientation: 'h', y: 1.15, font: { color: "#e2e8f0" } },
                 xaxis: { gridcolor: '#1e293b' },
                 yaxis: { gridcolor: '#1e293b', title: 'Power (Watts)' }
             };
@@ -987,10 +1002,10 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
                             <tr>
                                 <td class="p-2.5 text-slate-400">${r.id}</td>
                                 <td class="p-2.5 text-slate-300">${(r.timestamp || '').split('T')[1] || r.timestamp}</td>
-                                <td class="p-2.5 text-amber-400 font-mono">${r.solar_voltage}</td>
-                                <td class="p-2.5 text-emerald-400 font-mono">${r.battery_voltage}</td>
-                                <td class="p-2.5 text-emerald-400 font-mono">${r.battery_level}%</td>
-                                <td class="p-2.5 text-sky-400 font-mono">${r.load_power}</td>
+                                <td class="p-2.5 text-amber-400">${r.solar_voltage}</td>
+                                <td class="p-2.5 text-emerald-400">${r.battery_voltage}</td>
+                                <td class="p-2.5 text-emerald-400">${r.battery_level}%</td>
+                                <td class="p-2.5 text-sky-400">${r.load_power}</td>
                                 <td class="p-2.5 font-bold">${r.mode}</td>
                                 <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] ${r.ml_prediction === 'NORMAL' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${r.ml_prediction}</span></td>
                             </tr>
@@ -998,7 +1013,7 @@ TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.
                     }
                 }
             } catch (err) {
-                console.warn("History fetch error:", err);
+                // Silently fallback
             }
         }
 
