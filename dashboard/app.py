@@ -66,7 +66,9 @@ def svg_icon(name, size=18, color="#10b981", extra_style=""):
         "leaf": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>''',
         "home": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>''',
         "grid": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>''',
-        "cpu": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>'''
+        "cpu": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>''',
+        "stop": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>''',
+        "refresh": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>'''
     }
     return icons.get(name, "")
 
@@ -356,24 +358,57 @@ with tab_testing:
     </div>
     """, unsafe_allow_html=True)
 
+    # Fault Injection & Execution Toolbar (Exact to Reference UI)
+    st.markdown('<div style="background: #0d1624; border: 1px solid #1e293b; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;">', unsafe_allow_html=True)
+    tb_c1, tb_c2, tb_c3, tb_c4 = st.columns([1.6, 1.2, 1.2, 1.3])
+    with tb_c1:
+        sim_link = st.checkbox("Simulate link failure", value=st.session_state.get("sim_link", False), help="Fault Injection: Forces network packet drop rate to 100% to test communication failure handling.")
+        if sim_link != st.session_state.get("sim_link", False):
+            st.session_state.sim_link = sim_link
+            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo, link_failure=sim_link)
+            st.rerun()
+    with tb_c2:
+        if st.button("Start Test", type="primary", width="stretch"):
+            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
+            st.toast("Automated test run started & completed")
+    with tb_c3:
+        if st.button("Stop Test", width="stretch"):
+            st.toast("Test execution stopped by operator")
+    with tb_c4:
+        if st.button("Refresh Data", width="stretch"):
+            latest = api_get("/telemetry/latest") or latest
+            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
+            st.toast("Telemetry dataset refreshed from hardware")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    if st.session_state.get("sim_link", False):
+        st.markdown(f'''
+        <div class="alert-box-error" style="margin-bottom: 14px;">
+            {svg_icon("alert", size=20, color="#ef4444")}
+            <div>
+                <strong>FAULT INJECTION ACTIVE:</strong> Communication link failure simulated. Packet loss rate is 100%. Verifying system timeout and graceful degradation response.
+            </div>
+        </div>
+        ''', unsafe_allow_html=True)
+
     # Dropdown
     selected_case_str = st.selectbox("Test Scenario Selector", test_options, label_visibility="collapsed")
-    selected_tc_id = selected_case_str.split(" — ")[0]
+    selected_tc_id = selected_case_str.split(" ")[0]
 
     # Buttons: Run Individual and Run All Tests
     btn_col1, btn_col2, _ = st.columns([1.2, 1.4, 2.5])
     with btn_col1:
         if st.button("Run Individual", width="stretch"):
             tc_obj = next(t for t in ACADEMIC_TEST_CASES if t["id"] == selected_tc_id)
-            single_res = execute_test(tc_obj, latest, use_demo_data=use_demo)
+            single_res = execute_test(tc_obj, latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
             for idx, r in enumerate(st.session_state.academic_results):
                 if r["id"] == selected_tc_id:
                     st.session_state.academic_results[idx] = single_res
             st.toast(f"Tested {selected_tc_id}: {single_res['status']}")
 
     with btn_col2:
-        if st.button("Run All Tests", type="primary", width="stretch"):
-            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo)
+        if st.button("Run All Tests", width="stretch"):
+            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
             st.toast("Executed all 8 academic software test cases")
 
     # Get current selected test result

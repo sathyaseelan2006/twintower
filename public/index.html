@@ -210,6 +210,28 @@
                         </div>
                     </div>
 
+                                        <!-- Fault Injection & Execution Toolbar (Exact to Reference UI) -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-[#0d1624] border border-slate-800 p-3.5 rounded-xl mb-4">
+                        <label class="flex items-center gap-2.5 text-xs md:text-sm font-semibold text-slate-300 cursor-pointer select-none">
+                            <input type="checkbox" id="sim-link-fail-cb" onchange="toggleLinkFailure(this.checked)" class="w-4 h-4 accent-sky-500 rounded border-slate-700">
+                            <span>Simulate link failure</span>
+                        </label>
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="runAllTests()" class="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-lg shadow-sky-500/20 transition">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                Start Test
+                            </button>
+                            <button onclick="stopTestSuite()" class="px-4 py-2 bg-rose-900/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 font-bold text-xs rounded-lg flex items-center gap-1.5 transition">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                Stop Test
+                            </button>
+                            <button onclick="refreshTestData()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 font-bold text-xs rounded-lg flex items-center gap-1.5 transition">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                                Refresh Data
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Dropdown -->
                     <div class="mb-4">
                         <select id="academic-test-select" onchange="onSelectTest()" class="w-full bg-[#0d1624] border border-slate-700/80 rounded-lg p-3 text-xs md:text-sm text-white font-semibold focus:outline-none focus:border-sky-500 transition">
@@ -248,7 +270,7 @@
                         </div>
                         <div class="test-metric-box">
                             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">TOLERANCE</div>
-                            <div id="m-tolerance" class="text-xl font-extrabold text-white mt-1">±1 &deg;C</div>
+                            <div id="m-tolerance" class="text-xl font-extrabold text-white mt-1">&plusmn;1 &deg;C</div>
                         </div>
                         <div class="test-metric-box">
                             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">ERROR</div>
@@ -270,7 +292,7 @@
 
                     <!-- Reason text -->
                     <div id="m-reason" class="mt-4 text-xs font-semibold text-rose-400">
-                        Reason: Error 5.41 &deg;C exceeds tolerance ±1 &deg;C
+                        Reason: Error 5.41 &deg;C exceeds tolerance &plusmn;1 &deg;C
                     </div>
 
                     <!-- Test Case Items List -->
@@ -462,17 +484,60 @@
 
         // ACADEMIC TEST SUITE DATA (EXACT TO USER SPECIFICATION)
         let academicTests = [
-            { id: "TC-01", name: "Sensor reading validation (Temperature)", unit: "&deg;C", expected: 28.50, tolerance: 1.00, actual: 33.91, error: 5.41, duration_ms: 219, passed: false, status: "Fail", reason: "Error 5.41 &deg;C exceeds tolerance ±1 &deg;C" },
-            { id: "TC-02", name: "Communication connectivity (Packet success rate)", unit: "%", expected: 98.00, tolerance: 2.00, actual: 89.20, error: 8.80, duration_ms: 256, passed: false, status: "Fail", reason: "Error 8.80 % exceeds tolerance ±2 %" },
-            { id: "TC-03", name: "Hardware response time (Actuator latency)", unit: "ms", expected: 50.00, tolerance: 25.00, actual: 142.00, error: 92.00, duration_ms: 212, passed: false, status: "Fail", reason: "Error 92.00 ms exceeds tolerance ±25 ms" },
-            { id: "TC-04", name: "Threshold checking (Supply voltage)", unit: "V", expected: 16.80, tolerance: 0.50, actual: 16.75, error: 0.05, duration_ms: 48, passed: true, status: "Pass", reason: "Error 0.05 V is within tolerance ±0.5 V" },
-            { id: "TC-05", name: "Digital twin synchronization (Delta current)", unit: "A", expected: 0.17, tolerance: 0.03, actual: 0.18, error: 0.01, duration_ms: 64, passed: true, status: "Pass", reason: "Error 0.01 A is within tolerance ±0.03 A" },
-            { id: "TC-06", name: "Telemetry sampling jitter & packet loss", unit: "ms", expected: 2000.00, tolerance: 100.00, actual: 2038.00, error: 38.00, duration_ms: 82, passed: true, status: "Pass", reason: "Error 38.00 ms is within tolerance ±100 ms" },
-            { id: "TC-07", name: "Threshold checking (Solar generation bus)", unit: "V", expected: 10.50, tolerance: 1.20, actual: 10.20, error: 0.30, duration_ms: 55, passed: true, status: "Pass", reason: "Error 0.30 V is within tolerance ±1.2 V" },
-            { id: "TC-08", name: "State of Health (SoH) prediction model accuracy", unit: "%", expected: 95.00, tolerance: 2.00, actual: 94.60, error: 0.40, duration_ms: 76, passed: true, status: "Pass", reason: "Error 0.40 % is within tolerance ±2 %" }
+            { id: "TC-01", name: "Sensor reading validation (Temperature)", unit: "&deg;C", expected: 28.50, tolerance: 1.00, actual: 33.91, error: 5.41, duration_ms: 219, passed: false, status: "Fail", reason: "Error 5.41 &deg;C exceeds tolerance &plusmn;1 &deg;C" },
+            { id: "TC-02", name: "Communication connectivity (Packet success rate)", unit: "%", expected: 98.00, tolerance: 2.00, actual: 89.20, error: 8.80, duration_ms: 256, passed: false, status: "Fail", reason: "Error 8.80 % exceeds tolerance &plusmn;2 %" },
+            { id: "TC-03", name: "Hardware response time (Actuator latency)", unit: "ms", expected: 50.00, tolerance: 25.00, actual: 142.00, error: 92.00, duration_ms: 212, passed: false, status: "Fail", reason: "Error 92.00 ms exceeds tolerance &plusmn;25 ms" },
+            { id: "TC-04", name: "Threshold checking (Supply voltage)", unit: "V", expected: 16.80, tolerance: 0.50, actual: 16.75, error: 0.05, duration_ms: 48, passed: true, status: "Pass", reason: "Error 0.05 V is within tolerance &plusmn;0.5 V" },
+            { id: "TC-05", name: "Digital twin synchronization (Delta current)", unit: "A", expected: 0.17, tolerance: 0.03, actual: 0.18, error: 0.01, duration_ms: 64, passed: true, status: "Pass", reason: "Error 0.01 A is within tolerance &plusmn;0.03 A" },
+            { id: "TC-06", name: "Telemetry sampling jitter & packet loss", unit: "ms", expected: 2000.00, tolerance: 100.00, actual: 2038.00, error: 38.00, duration_ms: 82, passed: true, status: "Pass", reason: "Error 38.00 ms is within tolerance &plusmn;100 ms" },
+            { id: "TC-07", name: "Threshold checking (Solar generation bus)", unit: "V", expected: 10.50, tolerance: 1.20, actual: 10.20, error: 0.30, duration_ms: 55, passed: true, status: "Pass", reason: "Error 0.30 V is within tolerance &plusmn;1.2 V" },
+            { id: "TC-08", name: "State of Health (SoH) prediction model accuracy", unit: "%", expected: 95.00, tolerance: 2.00, actual: 94.60, error: 0.40, duration_ms: 76, passed: true, status: "Pass", reason: "Error 0.40 % is within tolerance &plusmn;2 %" }
         ];
 
         let selectedTestId = "TC-01";
+        let isLinkFailureActive = false;
+        function toggleLinkFailure(failed) {
+            isLinkFailureActive = failed;
+            academicTests.forEach(t => {
+                if (failed && (t.id === 'TC-02' || t.id === 'TC-03' || t.id === 'TC-06')) {
+                    if (t.id === 'TC-02') {
+                        t.actual = 0.00;
+                        t.error = 98.00;
+                        t.passed = false;
+                        t.status = 'Fail';
+                        t.reason = 'Error 98.00 % exceeds tolerance &plusmn;2.00 % (Simulated Link Failure: 0% Delivery)';
+                    } else if (t.id === 'TC-03') {
+                        t.actual = 1500.00;
+                        t.error = 1450.00;
+                        t.passed = false;
+                        t.status = 'Fail';
+                        t.reason = 'Error 1450.00 ms exceeds tolerance &plusmn;25.00 ms (Timeout: Gateway Unreachable)';
+                    }
+                } else if (!failed && t.id === 'TC-02') {
+                    t.actual = 89.20;
+                    t.error = 8.80;
+                    t.passed = false;
+                    t.status = 'Fail';
+                    t.reason = 'Error 8.80 % exceeds tolerance &plusmn;2.00 %';
+                } else if (!failed && t.id === 'TC-03') {
+                    t.actual = 142.00;
+                    t.error = 92.00;
+                    t.passed = false;
+                    t.status = 'Fail';
+                    t.reason = 'Error 92.00 ms exceeds tolerance &plusmn;25.00 ms';
+                }
+            });
+            renderTestingModule();
+        }
+
+        function stopTestSuite() {
+            alert('Test execution halted by operator.');
+        }
+
+        function refreshTestData() {
+            fetchLatestTelemetry();
+            renderTestingModule();
+        }
 
         function setTestEnv(demo) {
             isDemoMode = demo;
@@ -520,7 +585,7 @@
 
             document.getElementById('m-expected').textContent = `${current.expected} ${current.unit}`;
             document.getElementById('m-actual').textContent = `${current.actual} ${current.unit}`;
-            document.getElementById('m-tolerance').textContent = `±${current.tolerance} ${current.unit}`;
+            document.getElementById('m-tolerance').textContent = `&plusmn;${current.tolerance} ${current.unit}`;
             document.getElementById('m-error').textContent = `${current.error} ${current.unit}`;
             document.getElementById('m-duration').textContent = `${current.duration_ms} ms`;
 
@@ -531,12 +596,12 @@
                 statusPill.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
                 statusPill.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Pass';
                 reasonEl.className = "mt-4 text-xs font-semibold text-emerald-400";
-                reasonEl.textContent = `Reason: Error ${current.error} ${current.unit} is within tolerance ±${current.tolerance} ${current.unit}`;
+                reasonEl.textContent = `Reason: Error ${current.error} ${current.unit} is within tolerance &plusmn;${current.tolerance} ${current.unit}`;
             } else {
                 statusPill.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40";
                 statusPill.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> Fail';
                 reasonEl.className = "mt-4 text-xs font-semibold text-rose-400";
-                reasonEl.textContent = `Reason: Error ${current.error} ${current.unit} exceeds tolerance ±${current.tolerance} ${current.unit}`;
+                reasonEl.textContent = `Reason: Error ${current.error} ${current.unit} exceeds tolerance &plusmn;${current.tolerance} ${current.unit}`;
             }
 
             // Render List Items
@@ -582,7 +647,7 @@
                 t.unit,
                 t.expected,
                 t.actual,
-                `±${t.tolerance}`,
+                `&plusmn;${t.tolerance}`,
                 t.error,
                 t.duration_ms,
                 t.status,

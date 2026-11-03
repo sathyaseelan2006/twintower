@@ -315,17 +315,17 @@ def system_summary(db: Session = Depends(get_db)):
 from tests.academic_test_suite import ACADEMIC_TEST_CASES, execute_test, execute_all_tests
 
 @app.get("/tests/academic")
-def get_academic_tests(demo: bool = True, db: Session = Depends(get_db)):
+def get_academic_tests(demo: bool = True, link_failure: bool = False, db: Session = Depends(get_db)):
     latest = db.query(MicrogridTelemetryDB).order_by(MicrogridTelemetryDB.id.desc()).first()
     live_dict = {c.name: getattr(latest, c.name) for c in latest.__table__.columns} if latest else None
-    return execute_all_tests(live_dict, use_demo_data=demo)
+    return execute_all_tests(live_dict, use_demo_data=demo, link_failure=link_failure)
 
 @app.post("/tests/academic/run/{test_id}")
-def run_single_academic_test(test_id: str, demo: bool = True, db: Session = Depends(get_db)):
+def run_single_academic_test(test_id: str, demo: bool = True, link_failure: bool = False, db: Session = Depends(get_db)):
     tc = next((t for t in ACADEMIC_TEST_CASES if t["id"] == test_id), None)
     if not tc:
         raise HTTPException(status_code=404, detail=f"Test case {test_id} not found")
     latest = db.query(MicrogridTelemetryDB).order_by(MicrogridTelemetryDB.id.desc()).first()
     live_dict = {c.name: getattr(latest, c.name) for c in latest.__table__.columns} if latest else None
-    return execute_test(tc, live_dict, use_demo_data=demo)
+    return execute_test(tc, live_dict, use_demo_data=demo, link_failure=link_failure)
 

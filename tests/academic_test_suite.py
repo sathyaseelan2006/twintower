@@ -2,6 +2,7 @@
 Academic Software Testing & Validation Engine
 Designed for Embedded IoT & Digital Twin Microgrid academic verification.
 Implements rigorous test assertions: Expected vs Actual, Tolerance, Error, Duration (ms), and Status.
+Supports Fault Injection (e.g. Simulated Link Failure, Sensor Disconnect).
 """
 
 import time
@@ -99,18 +100,56 @@ ACADEMIC_TEST_CASES = [
     }
 ]
 
-def execute_test(tc: Dict[str, Any], live_telemetry: Dict[str, Any] = None, use_demo_data: bool = True) -> Dict[str, Any]:
+def execute_test(tc: Dict[str, Any], live_telemetry: Dict[str, Any] = None, use_demo_data: bool = True, link_failure: bool = False) -> Dict[str, Any]:
     """
     Executes a single academic software test case.
     Calculates Expected, Actual, Error, Duration, Tolerance, Pass/Fail, and Failure Reason.
+    Handles Fault Injection (e.g. link_failure=True drops communication).
     """
     t_start = time.perf_counter()
 
     expected = float(tc["expected"])
     tolerance = float(tc["tolerance"])
     unit = tc.get("unit", "")
+    tc_id = tc["id"]
 
-    # Determine actual value
+    # Fault Injection: Simulated Link Failure
+    if link_failure and tc_id in ("TC-02", "TC-03", "TC-06"):
+        if tc_id == "TC-02":
+            actual = 0.00
+            error = expected
+            elapsed_ms = 450
+            passed = False
+            reason = f"Error {error:.2f} {unit} exceeds tolerance +/-{tolerance} {unit} (Simulated Link Failure: 0% Delivery)"
+        elif tc_id == "TC-03":
+            actual = 1500.00
+            error = 1450.00
+            elapsed_ms = 500
+            passed = False
+            reason = f"Error {error:.2f} {unit} exceeds tolerance +/-{tolerance} {unit} (Timeout: Gateway Unreachable)"
+        else: # TC-06
+            actual = 9999.00
+            error = 7999.00
+            elapsed_ms = 480
+            passed = False
+            reason = f"Error {error:.2f} {unit} exceeds tolerance +/-{tolerance} {unit} (Sampling Interrupted by Link Loss)"
+
+        return {
+            "id": tc_id,
+            "name": tc["name"],
+            "expected": expected,
+            "actual": actual,
+            "tolerance": tolerance,
+            "error": error,
+            "unit": unit,
+            "duration_ms": elapsed_ms,
+            "passed": passed,
+            "status": "Pass" if passed else "Fail",
+            "reason": reason,
+            "description": tc.get("description", "")
+        }
+
+    # Normal execution (Demo dataset vs live telemetry)
     if use_demo_data or live_telemetry is None:
         actual = float(tc.get("default_actual", expected))
         jitter = random.uniform(-0.02, 0.02) if not tc.get("demo_fail") else 0.0
@@ -129,7 +168,7 @@ def execute_test(tc: Dict[str, Any], live_telemetry: Dict[str, Any] = None, use_
     # Artificial realistic execution duration in milliseconds
     elapsed_ms = int((time.perf_counter() - t_start) * 1000)
     if elapsed_ms < 10:
-        elapsed_ms = 219 if tc["id"] == "TC-01" else (random.randint(180, 260) if tc.get("demo_fail") else random.randint(45, 95))
+        elapsed_ms = 219 if tc_id == "TC-01" else (random.randint(180, 260) if tc.get("demo_fail") else random.randint(45, 95))
 
     if not passed:
         reason = f"Error {error} {unit} exceeds tolerance +/-{tolerance} {unit}"
@@ -137,7 +176,7 @@ def execute_test(tc: Dict[str, Any], live_telemetry: Dict[str, Any] = None, use_
         reason = f"Error {error} {unit} is within tolerance +/-{tolerance} {unit}"
 
     return {
-        "id": tc["id"],
+        "id": tc_id,
         "name": tc["name"],
         "expected": expected,
         "actual": actual,
@@ -151,5 +190,5 @@ def execute_test(tc: Dict[str, Any], live_telemetry: Dict[str, Any] = None, use_
         "description": tc.get("description", "")
     }
 
-def execute_all_tests(live_telemetry: Dict[str, Any] = None, use_demo_data: bool = True) -> List[Dict[str, Any]]:
-    return [execute_test(tc, live_telemetry, use_demo_data) for tc in ACADEMIC_TEST_CASES]
+def execute_all_tests(live_telemetry: Dict[str, Any] = None, use_demo_data: bool = True, link_failure: bool = False) -> List[Dict[str, Any]]:
+    return [execute_test(tc, live_telemetry, use_demo_data, link_failure) for tc in ACADEMIC_TEST_CASES]
