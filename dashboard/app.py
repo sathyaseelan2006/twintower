@@ -80,6 +80,13 @@ def svg_icon(name, size=18, color="#10b981", extra_style=""):
     }
     return icons.get(name, "")
 
+def render_html(html_str: str):
+    """
+    Renders pure HTML safely in Streamlit without triggering Markdown's 4-space code block formatting rule.
+    """
+    cleaned = "".join(line.strip() for line in html_str.splitlines() if line.strip())
+    st.markdown(cleaned, unsafe_allow_html=True)
+
 # ============================================================
 # CUSTOM CSS (DARK EXECUTIVE THEME)
 # ============================================================
@@ -292,7 +299,7 @@ with st.sidebar:
 # HEADER
 # ============================================================
 
-st.markdown(f"""
+render_html(f"""
 <div class="project-header">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
         <div style="display: flex; align-items: center; gap: 16px;">
@@ -318,7 +325,7 @@ st.markdown(f"""
         </div>
     </div>
 </div>
-""", unsafe_allow_html=True)
+""")
 
 # ============================================================
 # MULTI-TAB WORKSPACE (TESTING MODULE AS TAB #1)
@@ -357,7 +364,7 @@ with tab_testing:
         is_custom_active = st.session_state.active_suite_type == "custom" and st.session_state.custom_test_cases is not None
         env_label = f"CUSTOM CSV SUITE ({len(st.session_state.custom_test_cases)} CASES)" if is_custom_active else "DEFAULT ACADEMIC BENCHMARK (8 CASES)"
         env_color = "#c084fc" if is_custom_active else "#38bdf8"
-        st.markdown(f"""
+        render_html(f"""
         <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #94a3b8; font-size: 0.88rem; padding: 4px 0;">
             {svg_icon("cpu", size=18, color=env_color)}
             <span>ACTIVE TESTING ENVIRONMENT:</span>
@@ -365,7 +372,7 @@ with tab_testing:
                 {env_label}
             </span>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with suite_col2:
         if st.session_state.custom_test_cases is not None:
             chosen_suite = st.radio(
@@ -388,15 +395,15 @@ with tab_testing:
     # ============================================================
     expander_title = "Upload Custom Test Suite CSV & Configure Environment" if not st.session_state.custom_test_cases else f"Custom Test Suite Configured ({len(st.session_state.custom_test_cases)} Scenarios Loaded) - Click to Manage"
     with st.expander(expander_title, expanded=(st.session_state.custom_test_cases is None)):
-        st.markdown(f"""
+        render_html("""
         <div style="font-size: 0.88rem; color: #94a3b8; margin-bottom: 12px; line-height: 1.5;">
             Upload an academic test specification CSV file to dynamically instantiate custom test scenarios, tolerance bounds, and evaluation parameters for the embedded microgrid digital twin.
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
         up_col1, up_col2 = st.columns([1.6, 2.4])
         with up_col1:
-            st.markdown(f"""
+            render_html(f"""
             <div style="background: #0d1624; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; margin-bottom: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                     {svg_icon("download", size=18, color="#38bdf8")}
@@ -406,7 +413,7 @@ with tab_testing:
                     Download the pre-configured academic test scenario specification containing realistic boundary checks, sensor zero-offsets, thermal trips, and latency thresholds.
                 </p>
             </div>
-            """, unsafe_allow_html=True)
+            """)
             st.download_button(
                 label="Download Demo Test Suite CSV",
                 data=demo_csv_bytes,
@@ -476,12 +483,12 @@ with tab_testing:
     test_options = [f"{tc['id']} — {tc['name']}" for tc in current_test_cases]
 
     # Outer Card Container
-    st.markdown("""<div class="test-module-card">""", unsafe_allow_html=True)
+    render_html('<div class="test-module-card">')
 
     # Header inside card
     badge_label = "DEMO DATA" if use_demo else "LIVE DATA"
     badge_color = "#f59e0b" if use_demo else "#10b981"
-    st.markdown(f"""
+    render_html(f"""
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             {svg_icon("flask", size=24, color="#38bdf8")}
@@ -498,10 +505,10 @@ with tab_testing:
             </span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     # Fault Injection & Execution Toolbar (Exact to Reference UI)
-    st.markdown('<div style="background: #0d1624; border: 1px solid #1e293b; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;">', unsafe_allow_html=True)
+    render_html('<div style="background: #0d1624; border: 1px solid #1e293b; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;">')
     tb_c1, tb_c2, tb_c3, tb_c4 = st.columns([1.6, 1.2, 1.2, 1.3])
     with tb_c1:
         sim_link = st.checkbox("Simulate link failure", value=st.session_state.get("sim_link", False), help="Fault Injection: Forces network packet drop rate to 100% to test communication failure handling.")
@@ -521,17 +528,17 @@ with tab_testing:
             latest = api_get("/telemetry/latest") or latest
             st.session_state.academic_results = execute_test_suite(current_test_cases, latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
             st.toast("Telemetry dataset refreshed from hardware")
-    st.markdown('</div>', unsafe_allow_html=True)
+    render_html('</div>')
 
     if st.session_state.get("sim_link", False):
-        st.markdown(f'''
+        render_html(f'''
         <div class="alert-box-error" style="margin-bottom: 14px;">
             {svg_icon("alert", size=20, color="#ef4444")}
             <div>
                 <strong>FAULT INJECTION ACTIVE:</strong> Communication link failure simulated. Packet loss rate is 100%. Verifying system timeout and graceful degradation response.
             </div>
         </div>
-        ''', unsafe_allow_html=True)
+        ''')
 
     # Dropdown
     selected_case_str = st.selectbox("Test Scenario Selector", test_options, label_visibility="collapsed")
@@ -564,7 +571,7 @@ with tab_testing:
     st_rgb = "16, 185, 129" if curr_res["passed"] else "239, 68, 68"
     
     # 6-Card Metric Grid
-    st.markdown(f"""
+    render_html(f"""
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px;">
         <div class="test-kpi-card">
             <div class="test-kpi-label">EXPECTED</div>
@@ -600,33 +607,25 @@ with tab_testing:
     <div style="margin-top: 14px; font-size: 0.95rem; font-weight: 600; color: {st_color};">
         Reason: {curr_res['reason']}
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     # Test Case Execution List
-    items_html = ""
-    for r in st.session_state.academic_results:
-        c = "#10b981" if r["passed"] else "#ef4444"
-        rgb = "16, 185, 129" if r["passed"] else "239, 68, 68"
-        items_html += f"""
-        <div class="test-item-row">
-            <div style="display: flex; align-items: center; gap: 14px;">
-                <span style="font-family: monospace; color: #64748b; font-weight: 700; font-size: 0.88rem;">{r['id']}</span>
-                <span style="font-weight: 600; color: #f8fafc; font-size: 0.92rem;">{r['name']}</span>
-            </div>
-            <span style="background: rgba({rgb}, 0.18); color: {c}; border: 1px solid {c}; border-radius: 9999px; padding: 4px 14px; font-weight: 700; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px;">
-                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: {c};"></span>
-                {r['status']}
-            </span>
-        </div>
-        """
+    items_html = "".join([
+        f'<div class="test-item-row">'
+        f'<div style="display: flex; align-items: center; gap: 14px;">'
+        f'<span style="font-family: monospace; color: #64748b; font-weight: 700; font-size: 0.88rem;">{r["id"]}</span>'
+        f'<span style="font-weight: 600; color: #f8fafc; font-size: 0.92rem;">{r["name"]}</span>'
+        f'</div>'
+        f'<span style="background: rgba({"16, 185, 129" if r["passed"] else "239, 68, 68"}, 0.18); color: {"#10b981" if r["passed"] else "#ef4444"}; border: 1px solid {"#10b981" if r["passed"] else "#ef4444"}; border-radius: 9999px; padding: 4px 14px; font-weight: 700; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px;">'
+        f'<span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: {"#10b981" if r["passed"] else "#ef4444"};"></span>'
+        f'{r["status"]}'
+        f'</span>'
+        f'</div>'
+        for r in st.session_state.academic_results
+    ])
 
-    st.markdown(f"""
-    <div style="margin-top: 18px; border-top: 1px solid #1e293b; padding-top: 14px;">
-        {items_html}
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+    render_html(f'<div style="margin-top: 18px; border-top: 1px solid #1e293b; padding-top: 14px;">{items_html}</div>')
+    render_html("</div>")
 
     # ACADEMIC VERIFICATION SUMMARY & REPORT EXPORT
     total_cases = len(st.session_state.academic_results)
@@ -702,7 +701,7 @@ with tab_topo:
 
     col_grid, col_inv, col_ac, col_load = st.columns(4)
     with col_grid:
-        st.markdown(f"""
+        render_html(f"""
         <div class="node-card" style="border-top: 4px solid #f59e0b;">
             {svg_icon("solar", size=32, color="#f59e0b")}
             <h4 style="margin: 8px 0; color: #f8fafc;">Rooftop Solar PV</h4>
@@ -712,10 +711,10 @@ with tab_topo:
                 DC Power Flow: Active
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     with col_inv:
-        st.markdown(f"""
+        render_html(f"""
         <div class="node-card" style="border-top: 4px solid #10b981;">
             {svg_icon("cpu", size=32, color="#10b981")}
             <h4 style="margin: 8px 0; color: #f8fafc;">Solar Inverter & Gateway</h4>
@@ -725,10 +724,10 @@ with tab_topo:
                 Mode: {current_mode}
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     with col_ac:
-        st.markdown(f"""
+        render_html(f"""
         <div class="node-card" style="border-top: 4px solid #38bdf8;">
             {svg_icon("battery", size=32, color="#38bdf8")}
             <h4 style="margin: 8px 0; color: #f8fafc;">Battery Storage (BESS)</h4>
@@ -738,10 +737,10 @@ with tab_topo:
                 Temp: {bat_temp:.1f} deg C
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     with col_load:
-        st.markdown(f"""
+        render_html(f"""
         <div class="node-card" style="border-top: 4px solid #a855f7;">
             {svg_icon("home", size=32, color="#a855f7")}
             <h4 style="margin: 8px 0; color: #f8fafc;">AC Distribution & Loads</h4>
@@ -751,7 +750,7 @@ with tab_topo:
                 Status: {current_load_status}
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     st.write("")
 
