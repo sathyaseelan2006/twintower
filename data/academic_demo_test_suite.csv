@@ -1,0 +1,9 @@
+id,name,parameter,unit,expected,tolerance,actual,description
+TC-C01,Battery Over-voltage Cutoff Trip Point,battery_voltage,V,16.50,0.30,16.82,Validates high-voltage battery disconnect protection cutoff limit.
+TC-C02,Inverter Thermal Throttling Boundary,battery_temp,deg C,35.00,2.00,41.50,Validates thermal safety derating under high ambient heat conditions.
+TC-C03,ACS712 Current Sensor Zero-Calibration,load_current,A,0.00,0.05,0.02,Verifies quiescent zero-current sensor drift calibration.
+TC-C04,MPPT Solar Bus Regulation Stability,solar_voltage,V,11.00,0.80,10.65,Checks maximum power point tracker voltage tracking error.
+TC-C05,Critical Load Shedding Relay Latency,relay_latency,ms,30.00,10.00,28.00,Evaluates emergency disconnect trip response time under grid dropout.
+TC-C06,FreeRTOS Telemetry Sampling Jitter,sampling_interval,ms,2000.00,50.00,2018.00,Evaluates RTOS task timing periodicity and jitter.
+TC-C07,State of Charge (SoC) Coulomb Accuracy,battery_level,%,85.00,3.00,87.40,Cross-checks battery SoC against open-circuit voltage lookup curve.
+TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.20,Stress test packet delivery under simulated wireless channel attenuation.

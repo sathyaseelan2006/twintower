@@ -7,7 +7,9 @@ Supports Fault Injection (e.g. Simulated Link Failure, Sensor Disconnect).
 
 import time
 import random
-from typing import Dict, Any, List
+import csv
+import io
+from typing import Dict, Any, List, Union
 
 ACADEMIC_TEST_CASES = [
     {
@@ -114,20 +116,22 @@ def execute_test(tc: Dict[str, Any], live_telemetry: Dict[str, Any] = None, use_
     tc_id = tc["id"]
 
     # Fault Injection: Simulated Link Failure
-    if link_failure and tc_id in ("TC-02", "TC-03", "TC-06"):
-        if tc_id == "TC-02":
+    param_name = tc.get("parameter", "")
+    is_comm_test = tc_id in ("TC-02", "TC-03", "TC-06") or param_name in ("packet_success_rate", "relay_latency", "sampling_interval")
+    if link_failure and is_comm_test:
+        if tc_id == "TC-02" or param_name == "packet_success_rate":
             actual = 0.00
             error = expected
             elapsed_ms = 450
             passed = False
             reason = f"Error {error:.2f} {unit} exceeds tolerance +/-{tolerance} {unit} (Simulated Link Failure: 0% Delivery)"
-        elif tc_id == "TC-03":
+        elif tc_id == "TC-03" or param_name == "relay_latency":
             actual = 1500.00
             error = 1450.00
             elapsed_ms = 500
             passed = False
             reason = f"Error {error:.2f} {unit} exceeds tolerance +/-{tolerance} {unit} (Timeout: Gateway Unreachable)"
-        else: # TC-06
+        else: # TC-06 or sampling_interval
             actual = 9999.00
             error = 7999.00
             elapsed_ms = 480
@@ -192,3 +196,70 @@ def execute_test(tc: Dict[str, Any], live_telemetry: Dict[str, Any] = None, use_
 
 def execute_all_tests(live_telemetry: Dict[str, Any] = None, use_demo_data: bool = True, link_failure: bool = False) -> List[Dict[str, Any]]:
     return [execute_test(tc, live_telemetry, use_demo_data, link_failure) for tc in ACADEMIC_TEST_CASES]
+
+def execute_test_suite(test_cases: List[Dict[str, Any]], live_telemetry: Dict[str, Any] = None, use_demo_data: bool = True, link_failure: bool = False) -> List[Dict[str, Any]]:
+    """
+    Executes an arbitrary custom list of test cases (e.g. from an uploaded CSV).
+    """
+    return [execute_test(tc, live_telemetry, use_demo_data, link_failure) for tc in test_cases]
+
+def parse_csv_test_suite(csv_source: Union[str, bytes, io.StringIO, io.BytesIO]) -> List[Dict[str, Any]]:
+    """
+    Parses a CSV file, string, or byte-stream and constructs validated test case specifications.
+    Supported headers: id, name, parameter, unit, expected, tolerance, actual (or default_actual), description.
+    """
+    if isinstance(csv_source, bytes):
+        text = csv_source.decode("utf-8-sig", errors="replace")
+        stream = io.StringIO(text.strip())
+    elif isinstance(csv_source, str):
+        stream = io.StringIO(csv_source.strip())
+    else:
+        stream = csv_source
+
+    reader = csv.DictReader(stream)
+    test_cases: List[Dict[str, Any]] = []
+    idx = 1
+
+    for row in reader:
+        clean_row = {str(k).strip().lower(): str(v).strip() for k, v in row.items() if k is not None}
+        if not clean_row:
+            continue
+
+        tc_id = clean_row.get("id") or f"TC-C{idx:02d}"
+        tc_name = clean_row.get("name") or f"Custom Test Case {idx}"
+        tc_param = clean_row.get("parameter") or "custom_parameter"
+        tc_unit = clean_row.get("unit") or ""
+
+        try:
+            expected = float(clean_row.get("expected", 0.0))
+        except (ValueError, TypeError):
+            expected = 0.0
+
+        try:
+            tolerance = float(clean_row.get("tolerance", 0.1))
+        except (ValueError, TypeError):
+            tolerance = 0.1
+
+        actual_val = clean_row.get("actual") or clean_row.get("default_actual")
+        try:
+            default_actual = float(actual_val) if actual_val is not None and actual_val != "" else expected
+        except (ValueError, TypeError):
+            default_actual = expected
+
+        demo_fail = abs(default_actual - expected) > tolerance
+        description = clean_row.get("description") or f"Custom assertion criteria for {tc_name}"
+
+        test_cases.append({
+            "id": tc_id,
+            "name": tc_name,
+            "parameter": tc_param,
+            "unit": tc_unit,
+            "expected": expected,
+            "tolerance": tolerance,
+            "default_actual": default_actual,
+            "demo_fail": demo_fail,
+            "description": description
+        })
+        idx += 1
+
+    return test_cases

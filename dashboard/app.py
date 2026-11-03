@@ -24,7 +24,13 @@ load_dotenv(BASE_DIR / ".env")
 API_BASE_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000")
 
 # Import Testing Engine & Models
-from tests.academic_test_suite import ACADEMIC_TEST_CASES, execute_test, execute_all_tests
+from tests.academic_test_suite import (
+    ACADEMIC_TEST_CASES,
+    execute_test,
+    execute_all_tests,
+    execute_test_suite,
+    parse_csv_test_suite
+)
 from tests.test_microgrid_scenarios import BENCHMARK_CASES, run_test_case
 from ml.battery_health import battery_predictor
 from ml.energy_optimizer import energy_optimizer
@@ -68,7 +74,9 @@ def svg_icon(name, size=18, color="#10b981", extra_style=""):
         "grid": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>''',
         "cpu": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>''',
         "stop": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>''',
-        "refresh": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>'''
+        "refresh": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>''',
+        "upload": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>''',
+        "file": f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{extra_style}"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'''
     }
     return icons.get(name, "")
 
@@ -330,15 +338,146 @@ tab_testing, tab_topo, tab_forecast, tab_demand, tab_health, tab_savings, tab_lo
 # TAB 1: AUTOMATED TESTING MODULE (MATCHING USER SCREENSHOT)
 # ------------------------------------------------------------
 with tab_testing:
-    # State management for test results
-    if "academic_results" not in st.session_state:
-        st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo)
-    
-    test_options = [f"{tc['id']} — {tc['name']}" for tc in ACADEMIC_TEST_CASES]
-    
+    # Read the demo CSV file content for instant download
+    demo_csv_path = BASE_DIR / "data" / "academic_demo_test_suite.csv"
+    demo_csv_bytes = b""
+    if demo_csv_path.exists():
+        with open(demo_csv_path, "rb") as f:
+            demo_csv_bytes = f.read()
+
+    # Session state initialization for test cases
+    if "custom_test_cases" not in st.session_state:
+        st.session_state.custom_test_cases = None
+    if "active_suite_type" not in st.session_state:
+        st.session_state.active_suite_type = "default"  # 'default' or 'custom'
+
+    # Environment Selection Toolbar / Switcher
+    suite_col1, suite_col2 = st.columns([2.3, 1.7])
+    with suite_col1:
+        is_custom_active = st.session_state.active_suite_type == "custom" and st.session_state.custom_test_cases is not None
+        env_label = f"CUSTOM CSV SUITE ({len(st.session_state.custom_test_cases)} CASES)" if is_custom_active else "DEFAULT ACADEMIC BENCHMARK (8 CASES)"
+        env_color = "#c084fc" if is_custom_active else "#38bdf8"
+        st.markdown(f"""
+        <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #94a3b8; font-size: 0.88rem; padding: 4px 0;">
+            {svg_icon("cpu", size=18, color=env_color)}
+            <span>ACTIVE TESTING ENVIRONMENT:</span>
+            <span style="color: {env_color}; font-family: monospace; font-weight: 800;">
+                {env_label}
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+    with suite_col2:
+        if st.session_state.custom_test_cases is not None:
+            chosen_suite = st.radio(
+                "Suite Type",
+                options=["Default Benchmark", "Custom CSV Suite"],
+                index=0 if st.session_state.active_suite_type == "default" else 1,
+                horizontal=True,
+                label_visibility="collapsed",
+                key="suite_type_radio"
+            )
+            new_suite_type = "default" if chosen_suite == "Default Benchmark" else "custom"
+            if new_suite_type != st.session_state.active_suite_type:
+                st.session_state.active_suite_type = new_suite_type
+                active_cases = st.session_state.custom_test_cases if new_suite_type == "custom" else ACADEMIC_TEST_CASES
+                st.session_state.academic_results = execute_test_suite(active_cases, latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
+                st.rerun()
+
+    # ============================================================
+    # SECTION: CUSTOM CSV TEST ENVIRONMENT SETUP
+    # ============================================================
+    expander_title = "Upload Custom Test Suite CSV & Configure Environment" if not st.session_state.custom_test_cases else f"Custom Test Suite Configured ({len(st.session_state.custom_test_cases)} Scenarios Loaded) - Click to Manage"
+    with st.expander(expander_title, expanded=(st.session_state.custom_test_cases is None)):
+        st.markdown(f"""
+        <div style="font-size: 0.88rem; color: #94a3b8; margin-bottom: 12px; line-height: 1.5;">
+            Upload an academic test specification CSV file to dynamically instantiate custom test scenarios, tolerance bounds, and evaluation parameters for the embedded microgrid digital twin.
+        </div>
+        """, unsafe_allow_html=True)
+
+        up_col1, up_col2 = st.columns([1.6, 2.4])
+        with up_col1:
+            st.markdown(f"""
+            <div style="background: #0d1624; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    {svg_icon("download", size=18, color="#38bdf8")}
+                    <strong style="color: #f8fafc; font-size: 0.9rem;">Demo CSV Template</strong>
+                </div>
+                <p style="color: #64748b; font-size: 0.8rem; margin-bottom: 12px;">
+                    Download the pre-configured academic test scenario specification containing realistic boundary checks, sensor zero-offsets, thermal trips, and latency thresholds.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            st.download_button(
+                label="Download Demo Test Suite CSV",
+                data=demo_csv_bytes,
+                file_name="academic_microgrid_custom_suite.csv",
+                mime="text/csv",
+                width="stretch",
+                key="download_demo_csv_btn"
+            )
+
+        with up_col2:
+            uploaded_file = st.file_uploader(
+                "Upload Test Case CSV File",
+                type=["csv"],
+                help="Upload a CSV with headers: id, name, parameter, unit, expected, tolerance, actual, description",
+                key="csv_test_file_uploader"
+            )
+
+            if uploaded_file is not None:
+                try:
+                    parsed_cases = parse_csv_test_suite(uploaded_file.getvalue())
+                    if not parsed_cases:
+                        st.error("No valid test cases found in uploaded CSV.")
+                    else:
+                        st.session_state.custom_test_cases = parsed_cases
+                        st.session_state.active_suite_type = "custom"
+                        st.session_state.academic_results = execute_test_suite(
+                            parsed_cases,
+                            latest,
+                            use_demo_data=use_demo,
+                            link_failure=st.session_state.get("sim_link", False)
+                        )
+                        st.success(f"Custom Testing Environment successfully initialized with {len(parsed_cases)} test cases from '{uploaded_file.name}'!")
+                except Exception as ex:
+                    st.error(f"Error parsing CSV: {ex}")
+
+        # Show Table of Loaded Custom Test Suite if present
+        if st.session_state.custom_test_cases:
+            st.markdown("##### Uploaded Test Case Specifications")
+            preview_df = pd.DataFrame(st.session_state.custom_test_cases)[[
+                "id", "name", "parameter", "unit", "expected", "tolerance", "default_actual", "description"
+            ]]
+            preview_df.columns = ["ID", "Scenario Name", "Target Parameter", "Unit", "Expected", "Tolerance", "Actual (Vector)", "Description"]
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+
+            reset_col1, reset_col2 = st.columns([1.5, 2.5])
+            with reset_col1:
+                if st.button("Reset to Default Benchmark", width="stretch"):
+                    st.session_state.custom_test_cases = None
+                    st.session_state.active_suite_type = "default"
+                    st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
+                    st.rerun()
+
+    # Determine which test suite is currently active
+    if st.session_state.active_suite_type == "custom" and st.session_state.custom_test_cases:
+        current_test_cases = st.session_state.custom_test_cases
+        badge_suite_label = f"CUSTOM CSV ({len(current_test_cases)})"
+        badge_suite_color = "#c084fc"
+    else:
+        current_test_cases = ACADEMIC_TEST_CASES
+        badge_suite_label = "DEFAULT SUITE (8)"
+        badge_suite_color = "#38bdf8"
+
+    # Ensure results exist and match active suite length
+    if "academic_results" not in st.session_state or len(st.session_state.academic_results) != len(current_test_cases):
+        st.session_state.academic_results = execute_test_suite(current_test_cases, latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
+
+    test_options = [f"{tc['id']} — {tc['name']}" for tc in current_test_cases]
+
     # Outer Card Container
     st.markdown("""<div class="test-module-card">""", unsafe_allow_html=True)
-    
+
     # Header inside card
     badge_label = "DEMO DATA" if use_demo else "LIVE DATA"
     badge_color = "#f59e0b" if use_demo else "#10b981"
@@ -350,7 +489,10 @@ with tab_testing:
                 AUTOMATED TESTING MODULE
             </h3>
         </div>
-        <div>
+        <div style="display: flex; gap: 8px;">
+            <span style="background: rgba(192, 132, 252, 0.12); color: {badge_suite_color}; border: 1px solid {badge_suite_color}; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;">
+                {badge_suite_label}
+            </span>
             <span style="background: rgba(245, 158, 11, 0.12); color: {badge_color}; border: 1px solid {badge_color}; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;">
                 {badge_label}
             </span>
@@ -365,11 +507,11 @@ with tab_testing:
         sim_link = st.checkbox("Simulate link failure", value=st.session_state.get("sim_link", False), help="Fault Injection: Forces network packet drop rate to 100% to test communication failure handling.")
         if sim_link != st.session_state.get("sim_link", False):
             st.session_state.sim_link = sim_link
-            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo, link_failure=sim_link)
+            st.session_state.academic_results = execute_test_suite(current_test_cases, latest, use_demo_data=use_demo, link_failure=sim_link)
             st.rerun()
     with tb_c2:
         if st.button("Start Test", type="primary", width="stretch"):
-            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
+            st.session_state.academic_results = execute_test_suite(current_test_cases, latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
             st.toast("Automated test run started & completed")
     with tb_c3:
         if st.button("Stop Test", width="stretch"):
@@ -377,7 +519,7 @@ with tab_testing:
     with tb_c4:
         if st.button("Refresh Data", width="stretch"):
             latest = api_get("/telemetry/latest") or latest
-            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
+            st.session_state.academic_results = execute_test_suite(current_test_cases, latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
             st.toast("Telemetry dataset refreshed from hardware")
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -399,7 +541,7 @@ with tab_testing:
     btn_col1, btn_col2, _ = st.columns([1.2, 1.4, 2.5])
     with btn_col1:
         if st.button("Run Individual", width="stretch"):
-            tc_obj = next(t for t in ACADEMIC_TEST_CASES if t["id"] == selected_tc_id)
+            tc_obj = next((t for t in current_test_cases if t["id"] == selected_tc_id), current_test_cases[0])
             single_res = execute_test(tc_obj, latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
             for idx, r in enumerate(st.session_state.academic_results):
                 if r["id"] == selected_tc_id:
@@ -408,11 +550,15 @@ with tab_testing:
 
     with btn_col2:
         if st.button("Run All Tests", width="stretch"):
-            st.session_state.academic_results = execute_all_tests(latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
-            st.toast("Executed all 8 academic software test cases")
+            st.session_state.academic_results = execute_test_suite(current_test_cases, latest, use_demo_data=use_demo, link_failure=st.session_state.get("sim_link", False))
+            st.toast(f"Executed all {len(current_test_cases)} academic software test cases")
 
     # Get current selected test result
-    curr_res = next((r for r in st.session_state.academic_results if r["id"] == selected_tc_id), st.session_state.academic_results[0])
+    curr_res = next((r for r in st.session_state.academic_results if r["id"] == selected_tc_id), st.session_state.academic_results[0] if st.session_state.academic_results else None)
+    if curr_res is None:
+        curr_res = {
+            "expected": 0, "actual": 0, "tolerance": 0, "error": 0, "duration_ms": 0, "unit": "", "passed": True, "status": "Pass", "reason": "No test selected"
+        }
     
     st_color = "#10b981" if curr_res["passed"] else "#ef4444"
     st_rgb = "16, 185, 129" if curr_res["passed"] else "239, 68, 68"

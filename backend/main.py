@@ -1,3 +1,5 @@
+from typing import List, Dict, Any, Optional
+import os
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -312,7 +314,8 @@ def system_summary(db: Session = Depends(get_db)):
 # ============================================================
 # ACADEMIC SOFTWARE TESTING SUITE ENDPOINTS
 # ============================================================
-from tests.academic_test_suite import ACADEMIC_TEST_CASES, execute_test, execute_all_tests
+from tests.academic_test_suite import ACADEMIC_TEST_CASES, execute_test, execute_all_tests, execute_test_suite, parse_csv_test_suite
+from fastapi.responses import PlainTextResponse
 
 @app.get("/tests/academic")
 def get_academic_tests(demo: bool = True, link_failure: bool = False, db: Session = Depends(get_db)):
@@ -328,4 +331,19 @@ def run_single_academic_test(test_id: str, demo: bool = True, link_failure: bool
     latest = db.query(MicrogridTelemetryDB).order_by(MicrogridTelemetryDB.id.desc()).first()
     live_dict = {c.name: getattr(latest, c.name) for c in latest.__table__.columns} if latest else None
     return execute_test(tc, live_dict, use_demo_data=demo, link_failure=link_failure)
+
+@app.get("/tests/academic/demo-csv", response_class=PlainTextResponse)
+def get_demo_test_csv():
+    demo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "academic_demo_test_suite.csv")
+    if os.path.exists(demo_path):
+        with open(demo_path, "r", encoding="utf-8") as f:
+            return f.read()
+    return "id,name,parameter,unit,expected,tolerance,actual,description\nTC-C01,Demo Test,battery_voltage,V,16.5,0.3,16.8,Sample"
+
+@app.post("/tests/academic/custom-suite")
+def run_custom_test_suite(test_cases: List[Dict[str, Any]], demo: bool = True, link_failure: bool = False, db: Session = Depends(get_db)):
+    latest = db.query(MicrogridTelemetryDB).order_by(MicrogridTelemetryDB.id.desc()).first()
+    live_dict = {c.name: getattr(latest, c.name) for c in latest.__table__.columns} if latest else None
+    return execute_test_suite(test_cases, live_dict, use_demo_data=demo, link_failure=link_failure)
+
 

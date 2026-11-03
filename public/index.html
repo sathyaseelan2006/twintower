@@ -192,6 +192,39 @@
             </div>
 
             <!-- TAB 1: AUTOMATED TESTING MODULE (MATCHING USER SCREENSHOT EXACTLY) -->
+                <!-- CSV TEST ENVIRONMENT SETUP SECTION -->
+                <div class="card-dark p-5 border border-purple-900/40 bg-gradient-to-r from-[#0d1624] to-[#141026]">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <div>
+                                <h3 class="text-sm font-extrabold text-white tracking-wide">Custom CSV Testing Environment Setup</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Upload a test specification CSV file to dynamically instantiate scenarios, tolerance margins, and expected benchmarks.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 self-start md:self-auto">
+                            <span id="active-suite-badge" class="px-3 py-1 rounded text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30">
+                                Active: Built-in Benchmark (8 Cases)
+                            </span>
+                            <button id="reset-suite-btn" onclick="resetToBuiltinSuite()" class="hidden px-2.5 py-1 text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800">
+                        <button onclick="downloadDemoCSV()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-sky-400 border border-slate-700 font-bold text-xs rounded-lg flex items-center gap-2 transition">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Download Demo CSV Template
+                        </button>
+                        <label class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg flex items-center gap-2 cursor-pointer shadow-lg shadow-purple-900/30 transition">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span>Upload Test Suite CSV</span>
+                            <input type="file" id="custom-csv-input" accept=".csv" class="hidden" onchange="handleCsvUpload(event)">
+                        </label>
+                        <span id="csv-upload-status" class="text-xs text-slate-400 font-medium">Ready: Upload .csv to initialize environment</span>
+                    </div>
+                </div>
             <div id="tab-test" class="tab-content space-y-6">
                 <!-- THE TESTING MODULE CONTAINER -->
                 <div class="test-card p-6 shadow-2xl">
@@ -495,6 +528,122 @@
         ];
 
         let selectedTestId = "TC-01";
+        const defaultAcademicTests = JSON.parse(JSON.stringify(academicTests));
+
+        const demoCsvData = `id,name,parameter,unit,expected,tolerance,actual,description
+TC-C01,Battery Over-voltage Cutoff Trip Point,battery_voltage,V,16.50,0.30,16.82,Validates high-voltage battery disconnect protection cutoff limit.
+TC-C02,Inverter Thermal Throttling Boundary,battery_temp,deg C,35.00,2.00,41.50,Validates thermal safety derating under high ambient heat conditions.
+TC-C03,ACS712 Current Sensor Zero-Calibration,load_current,A,0.00,0.05,0.02,Verifies quiescent zero-current sensor drift calibration.
+TC-C04,MPPT Solar Bus Regulation Stability,solar_voltage,V,11.00,0.80,10.65,Checks maximum power point tracker voltage tracking error.
+TC-C05,Critical Load Shedding Relay Latency,relay_latency,ms,30.00,10.00,28.00,Evaluates emergency disconnect trip response time under grid dropout.
+TC-C06,FreeRTOS Telemetry Sampling Jitter,sampling_interval,ms,2000.00,50.00,2018.00,Evaluates RTOS task timing periodicity and jitter.
+TC-C07,State of Charge (SoC) Coulomb Accuracy,battery_level,%,85.00,3.00,87.40,Cross-checks battery SoC against open-circuit voltage lookup curve.
+TC-C08,Telemetry Link Heartbeat Packet Loss,packet_success_rate,%,99.00,1.00,94.20,Stress test packet delivery under simulated wireless channel attenuation.`;
+
+        function downloadDemoCSV() {
+            const blob = new Blob([demoCsvData], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "academic_microgrid_custom_suite.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function handleCsvUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const text = evt.target.result;
+                    const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+                    if (lines.length < 2) {
+                        alert("CSV contains no data rows.");
+                        return;
+                    }
+
+                    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+                    const idIdx = headers.indexOf('id');
+                    const nameIdx = headers.indexOf('name');
+                    const expIdx = headers.indexOf('expected');
+                    const tolIdx = headers.indexOf('tolerance');
+                    const actIdx = headers.indexOf('actual') !== -1 ? headers.indexOf('actual') : headers.indexOf('default_actual');
+                    const unitIdx = headers.indexOf('unit');
+                    const descIdx = headers.indexOf('description');
+
+                    const parsed = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+                        if (cols.length < 2) continue;
+
+                        const id = idIdx !== -1 && cols[idIdx] ? cols[idIdx] : `TC-C0${i}`;
+                        const name = nameIdx !== -1 && cols[nameIdx] ? cols[nameIdx] : `Custom Test Case ${i}`;
+                        const unit = unitIdx !== -1 && cols[unitIdx] ? cols[unitIdx] : '';
+                        const expected = expIdx !== -1 ? parseFloat(cols[expIdx]) || 0 : 0;
+                        const tolerance = tolIdx !== -1 ? parseFloat(cols[tolIdx]) || 0.1 : 0.1;
+                        const actual = actIdx !== -1 ? parseFloat(cols[actIdx]) || expected : expected;
+                        const error = Math.round(Math.abs(actual - expected) * 100) / 100;
+                        const passed = error <= tolerance;
+                        const desc = descIdx !== -1 ? cols[descIdx] : '';
+
+                        parsed.push({
+                            id: id,
+                            name: name,
+                            unit: unit,
+                            expected: expected,
+                            tolerance: tolerance,
+                            actual: actual,
+                            error: error,
+                            duration_ms: Math.floor(Math.random() * 50) + (passed ? 40 : 200),
+                            passed: passed,
+                            status: passed ? "Pass" : "Fail",
+                            reason: passed ? `Error ${error} ${unit} is within tolerance &plusmn;${tolerance} ${unit}` : `Error ${error} ${unit} exceeds tolerance &plusmn;${tolerance} ${unit}`,
+                            description: desc
+                        });
+                    }
+
+                    if (parsed.length === 0) {
+                        alert("Failed to parse test cases from CSV.");
+                        return;
+                    }
+
+                    academicTests = parsed;
+                    selectedTestId = academicTests[0].id;
+
+                    const selectEl = document.getElementById('academic-test-select');
+                    selectEl.innerHTML = academicTests.map(t => `<option value="${t.id}">${t.id} &mdash; ${t.name}</option>`).join('');
+
+                    document.getElementById('active-suite-badge').textContent = `Active: Custom CSV Suite (${academicTests.length} Cases)`;
+                    document.getElementById('active-suite-badge').className = "px-3 py-1 rounded text-[11px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40";
+                    document.getElementById('reset-suite-btn').classList.remove('hidden');
+                    document.getElementById('csv-upload-status').textContent = `Loaded ${academicTests.length} test cases from '${file.name}'`;
+                    document.getElementById('csv-upload-status').className = "text-xs text-emerald-400 font-semibold";
+
+                    renderTestingModule();
+                } catch (err) {
+                    alert("Error parsing CSV: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetToBuiltinSuite() {
+            academicTests = JSON.parse(JSON.stringify(defaultAcademicTests));
+            selectedTestId = academicTests[0].id;
+
+            const selectEl = document.getElementById('academic-test-select');
+            selectEl.innerHTML = academicTests.map(t => `<option value="${t.id}">${t.id} &mdash; ${t.name}</option>`).join('');
+
+            document.getElementById('active-suite-badge').textContent = "Active: Built-in Benchmark (8 Cases)";
+            document.getElementById('active-suite-badge').className = "px-3 py-1 rounded text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30";
+            document.getElementById('reset-suite-btn').classList.add('hidden');
+            document.getElementById('csv-upload-status').textContent = "Ready: Upload .csv to initialize environment";
+            document.getElementById('csv-upload-status').className = "text-xs text-slate-400 font-medium";
+
+            renderTestingModule();
+        }
         let isLinkFailureActive = false;
         function toggleLinkFailure(failed) {
             isLinkFailureActive = failed;
